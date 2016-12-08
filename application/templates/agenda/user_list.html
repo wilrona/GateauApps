@@ -1,0 +1,64 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Liste des personnes notifiées</h4>
+</div>
+<div class="modal-body">
+
+    <table class="table table-condensed table-hover">
+        <thead>
+        <tr>
+            <th>Email ID</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for item in calendar.email_user %}
+                <tr>
+                    <td>{{ item }}</td>
+                    <td><a href="{{ url_for('agenda.DeleteUser', idrole=(loop.index-1)) }}" class="delete">Supprimer</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+</div>
+<div class="modal-footer">
+    <div class="pull-left">
+        <form class="form-inline" id="formulaire">
+            <div class="form-group">
+                <label for="exampleInputName2">Ajouter un utilisateur: </label>
+                <input type="text" class="form-control" id="exampleInputName2" name="email" placeholder="adresse email Gmail">
+            </div>
+            <button type="button" id="submit" class="btn btn-primary">Valider</button>
+        </form>
+    </div>
+    <div class="pull-right">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+    </div>
+</div>
+
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('agenda.AddUser') }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    $('.delete').on('click', function(e){
+        e.preventDefault();
+        var url = $(this).attr("href");
+        $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+</script>

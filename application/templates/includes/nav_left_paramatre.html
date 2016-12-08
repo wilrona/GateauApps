@@ -1,0 +1,61 @@
+<div class="">
+    <div class="page-header">
+          <h1 class="text-center">Parametrages</h1>
+        </div>
+<ul class="nav nav-pills nav-stacked">
+        {% if current_user.has_roles([('super_admin', 'topping')]) %}
+            <li {% if submenu == 'topping' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='topping') }}">Topping</a></li>
+        {% endif %}
+
+        {% if current_user.has_roles([('super_admin', 'couleurs_cup')]) %}
+            <li {% if submenu == 'couleurs cup' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='couleurs cup') }}">Couleurs Cup</a></li>
+        {% endif %}
+
+        {% if current_user.has_roles([('super_admin', 'fourrages')]) %}
+            <li {% if submenu == 'fourrages' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='fourrages') }}">Fourrages</a></li>
+        {% endif %}
+
+        {% if current_user.has_roles([('super_admin', 'gouts_cremes')]) %}
+            <li {% if submenu == 'gouts cremes' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='gouts cremes') }}">Gouts Cremes</a></li>
+        {% endif %}
+
+        {% if current_user.has_roles([('super_admin', 'coulis')]) %}
+            <li {% if submenu == 'coulis' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='coulis') }}">Coulis</a></li>
+        {% endif %}
+
+        {% if current_user.has_roles([('super_admin', 'imbibages')]) %}
+            <li {% if submenu == 'imbibages' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='imbibages') }}">Imbibages</a></li>
+        {% endif %}
+
+        {% if current_user.has_roles([('super_admin', 'moules')]) %}
+            <li {% if submenu == 'moules' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='moules') }}">Moules</a></li>
+        {% endif %}
+
+        {% if current_user.has_roles([('super_admin', 'couleur_ruban')]) %}
+            <li {% if submenu == 'couleurs rubans' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='couleurs rubans') }}">Couleurs des rubans</a></li>
+        {% endif %}
+
+        {% if current_user.has_roles([('super_admin', 'categorie')]) %}
+            <li {% if submenu == 'categories' %} class="active" {% endif %}><a href="{{ url_for('config.index', name_data='categories') }}">Categories</a></li>
+        {% endif %}
+        {% if current_user.has_roles([('super_admin', 'type_gataux')]) %}
+            <li {% if submenu == 'type_gateaux' %} class="active" {% endif %}><a href="{{ url_for('type_gateau.index') }}">Type de gateaux</a></li>
+        {% endif %}
+        {% if current_user.has_roles([('super_admin', 'evenement')]) %}
+            <li {% if submenu == 'event' %} class="active" {% endif %}><a href="{{ url_for('event.index') }}">Evenements</a></li>
+        {% endif %}
+        {% if current_user.has_roles([('super_admin', 'user')]) %}
+            <li {% if submenu == 'user' %} class="active" {% endif %}><a href="{{ url_for('user_param.index') }}">Users</a></li>
+        {% endif %}
+        {% if current_user.has_roles([('super_admin')]) %}
+            <li {% if submenu == 'roles' %} class="active" {% endif %}><a href="{{ url_for('role.index') }}">Roles</a></li>
+        {% endif %}
+        {% if current_user.has_roles([('super_admin', 'profil')]) %}
+            <li {% if submenu == 'profils' %} class="active" {% endif %}><a href="{{ url_for('profil.index') }}">Profils</a></li>
+        {% endif %}
+        {% if current_user.has_roles([('super_admin', 'agenda')]) %}
+            <li {% if submenu == 'agenda' %} class="active" {% endif %}><a href="{{ url_for('agenda.index') }}">Agenda Config</a></li>
+        {% endif %}
+
+</ul>
+</div>

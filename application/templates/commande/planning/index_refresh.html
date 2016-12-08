@@ -1,0 +1,607 @@
+{% if not printer %}
+ <div id="load" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3); display: none;    color: #fff;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20;">Chargement</div>
+
+  <table class="table table-condensed table-bordered">
+                    <thead>
+                    <tr>
+                        <th width="15%">Date</th>
+                        <th width="25%">Moule</th>
+                        <th width="30%">Details</th>
+                        <th width="15%">Theme</th>
+                        <th width="15%">Client</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for data in datas %}
+
+                        <tr>
+                            <td rowspan="{{ (data.moule|length) }}">{{ DayL[data.dateliv.weekday()] }} {{ data.dateliv|format_date('%d') }} {{ Monthly[data.dateliv.month - 1] }} </td>
+                            {% if data.moule[0].gateau.type_produit() == 1 %}
+                                <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Moule</dt>
+                                      <dd>{{ data.moule[0].name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ data.moule[0].qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ data.moule[0].time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                </td>
+                                <td>
+                                    {% for layer in data.moule[0].composite %}
+                                                {% if loop.index > 1 %}
+                                                <hr style="margin-bottom:5px;"/>
+                                                {% endif %}
+                                                {% if layer.name_goutcreme() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Gout de creme</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_goutcreme() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_imbibage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Imbibage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_imbibage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_coulis() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Coulis</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_coulis() }}</div>
+                                                </div>
+                                                {% endif %}
+                                    {% endfor %}
+                                </td>
+
+                            <td><a href="{{ url_for('commande.facture', id_commande=data.moule[0].cmd_id) }}" target="_blank">{{ data.moule[0].theme }}</a></td>
+                            <td>{{ data.moule[0].client.get().name }}</td>
+
+                            {% endif %}
+                            {% if data.moule[0].gateau.type_produit() == 2 %}
+                                <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Produit</dt>
+                                      <dd>{{ data.moule[0].name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ data.moule[0].qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ data.moule[0].time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                </td>
+                                <td>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Forme de sable</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ data.moule[0].gateau.name_type_gateau() }}</div>
+                                    </div>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Couleur de ruban</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ data.moule[0].gateau.couleur_ruban() }}</div>
+                                    </div>
+                                </td>
+
+                            <td><a href="{{ url_for('commande.facture', id_commande=data.moule[0].cmd_id) }}" target="_blank">{{ data.moule[0].theme }}</a></td>
+                            <td>{{ data.moule[0].client.get().name }}</td>
+
+                            {% endif %}
+
+                            {% if data.moule[0].gateau.type_produit() == 3 %}
+                                 <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Produit</dt>
+                                      <dd>{{ data.moule[0].name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ data.moule[0].qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ data.moule[0].time|format_date('%H:%M') }}</dd>
+                                    </dl>
+
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Type cupcake</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ data.moule[0].gateau.name_type_gateau() }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% for layer in data.moule[0].composite %}
+                                                {% if loop.index > 1 %}
+                                                <hr style="margin-bottom:5px;"/>
+                                                {% endif %}
+                                                {% if layer.name_fourage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Fourrage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_fourage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_goutcreme() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Gout de creme</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_goutcreme() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_imbibage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Imbibage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_imbibage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_coulis() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Coulis</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_coulis() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_topping() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Topping</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_topping() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_couleur_cup() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Couleur cup</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_couleur_cup() }}</div>
+                                                </div>
+                                                {% endif %}
+                                    {% endfor %}
+                                </td>
+
+                            <td><a href="{{ url_for('commande.facture', id_commande=data.moule[0].cmd_id) }}" target="_blank">{{ data.moule[0].theme }}</a></td>
+                            <td>{{ data.moule[0].client.get().name }}</td>
+
+                            {% endif %}
+
+                        </tr>
+                        {% for ml in data.moule %}
+                            {% if loop.index > 1 %}
+                            <tr>
+                            {% if ml.gateau.type_produit() == 1 %}
+                                <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Moule</dt>
+                                      <dd>{{ ml.name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ ml.qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ ml.time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                </td>
+                                <td>
+                                    {% for layer in ml.composite %}
+                                                {% if loop.index > 1 %}
+                                                <hr style="margin-bottom:5px;"/>
+                                                {% endif %}
+                                                {% if layer.name_goutcreme() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Gout de creme</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_goutcreme() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_imbibage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Imbibage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_imbibage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_coulis() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Coulis</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_coulis() }}</div>
+                                                </div>
+                                                {% endif %}
+                                    {% endfor %}
+                                </td>
+                               <td><a href="{{ url_for('commande.facture', id_commande=ml.cmd_id) }}" target="_blank">{{ ml.theme }}</a></td>
+                                <td>{{ ml.client.get().name }}</td>
+
+                            {% endif %}
+                            {% if ml.gateau.type_produit() == 2 %}
+                                <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Produit</dt>
+                                      <dd>{{ ml.name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ ml.qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ ml.time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                </td>
+                                <td>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Forme de sable</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ ml.gateau.name_type_gateau() }}</div>
+                                    </div>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Couleur de ruban</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ ml.gateau.couleur_ruban() }}</div>
+                                    </div>
+                                </td>
+                                <td><a href="{{ url_for('commande.facture', id_commande=ml.cmd_id) }}" target="_blank">{{ ml.theme }}</a></td>
+                                <td>{{ ml.client.get().name }}</td>
+
+                            {% endif %}
+                               {% if ml.gateau.type_produit() == 3 %}
+                                 <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Produit</dt>
+                                      <dd>{{ ml.name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ ml.qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ ml.time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Type cupcake</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ ml.gateau.name_type_gateau() }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% for layer in ml.composite %}
+                                                {% if loop.index > 1 %}
+                                                <hr style="margin-bottom:5px;"/>
+                                                {% endif %}
+                                                {% if layer.name_fourage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Fourrage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_fourage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_goutcreme() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Gout de creme</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_goutcreme() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_imbibage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Imbibage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_imbibage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_coulis() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Coulis</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_coulis() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_topping() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Topping</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_topping() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_couleur_cup() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Couleur cup</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_couleur_cup() }}</div>
+                                                </div>
+                                                {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td><a href="{{ url_for('commande.facture', id_commande=ml.cmd_id) }}" target="_blank">{{ ml.theme }}</a></td>
+                                <td>{{ ml.client.get().name }}</td>
+
+                            {% endif %}
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+
+                    {% else %}
+
+                         <tr>
+                            <td colspan="6">
+                                <h4 class="text-center">Aucune information</h4>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+                 </table>
+
+{% else %}
+ <html lang='en'>
+ <head>
+ 	<meta charset='utf-8'>
+ 	<title>{{ title_page }}</title>
+
+     <script type="text/javascript" src="/static/js/pdfmake.js"></script>
+     <script type="text/javascript" src="/static/js/vfs_fonts.js"></script>
+     <script>
+
+          var docDefinition = {
+              pagesize: 'A4',
+              pageOrientation: 'landscape',
+              pageMargins:[30,50,30,30],
+              header: [
+                  {
+                      text: 'Creative Cake',
+                      alignment: 'center',
+                      margin:[0, 25, 0, 0],
+                      fontSize:15
+                  }
+              ],
+              footer:function(currentPage, pageCount) {
+                  return [{
+                      text: currentPage.toString() + ' sur ' + pageCount,
+                      alignment: 'center',
+                      fontSize:10
+                  },{
+                      text: '{{ now|format_date('%d/%m/%Y %H:%M') }}',
+                      alignment: 'center',
+                      fontSize:10
+                  }
+                  ]
+              },
+              content: [
+                  {
+                      text: '{{ title_page }}',
+                      alignment: 'center',
+                      fontSize: 20,
+                      margin:[0, 0, 0, 2]
+                  },
+                  {
+                      text: 'Periode du {{ date_start|format_date('%d/%m/%Y') }} au {{ date_end|format_date('%d/%m/%Y') }}',
+                      alignment: 'center',
+                      margin:[0, 10, 0, 10]
+                  },
+                  {
+                      table: {
+                            headerRows: 1,
+                            widths: ['auto','*','*','*','*'],
+                            body: [
+                                    [{ text: 'Date', bold: true, alignment:'left' }, { text: 'Moule', bold: true }, { text: 'Details', bold: true }, { text: 'Theme', bold: true }, { text: 'Client', bold: true}],
+                                    {% for data in datas %}
+                                       [
+                                           {rowspan:{{ data.moule|length }}, text:'{{ DayL[data.dateliv.weekday()] }} {{ data.dateliv|format_date('%d') }} {{ Monthly[data.dateliv.month - 1] }}', alignment:'left'},
+                                           {% if data.moule[0].gateau.type_produit() == 1 %}
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                                   [{text:'Moule', bold:true}, '{{ data.moule[0].name }}'],
+                                                                   [{text:'Quantite', bold:true}, '{{ data.moule[0].qte }}'],
+                                                                   [{text:'Heure de livraison', bold:true}, '{{ data.moule[0].time|format_date('%H:%M') }}']
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                               {% for layer in data.moule[0].composite %}
+                                                                   {% if layer.name_goutcreme() %}
+                                                                      [{text:'Gout de creme', bold:true}, '{{ layer.name_goutcreme() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_imbibage() %}
+                                                                      [{text:'Imbibage', bold:true}, '{{ layer.name_imbibage() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_coulis() %}
+                                                                      [{text:'Coulis', bold:true}, '{{ layer.name_coulis() }}'],
+                                                                   {% endif %}
+                                                               {% endfor %}
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               '{{ data.moule[0].theme }}',
+                                               '{{ data.moule[0].client.get().name }}'
+                                           {% endif %}
+                                           {% if data.moule[0].gateau.type_produit() == 2 %}
+                                                 [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                                   [{text:'Moule', bold:true}, '{{ data.moule[0].name }}'],
+                                                                   [{text:'Quantite', bold:true}, '{{ data.moule[0].qte }}'],
+                                                                   [{text:'Heure de livraison', bold:true}, '{{ data.moule[0].time|format_date('%H:%M') }}']
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                               [{text:'Forme de sable', bold:true}, '{{ data.moule[0].gateau.name_type_gateau() }}'],
+                                                               [{text:'Couleur de ruban', bold:true}, '{{ data.moule[0].gateau.couleur_ruban() }}']
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               '{{ data.moule[0].theme }}',
+                                               '{{ data.moule[0].client.get().name }}'
+                                           {% endif %}
+                                           {% if data.moule[0].gateau.type_produit() == 3 %}
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                                   [{text:'Moule', bold:true}, '{{ data.moule[0].name }}'],
+                                                                   [{text:'Quantite', bold:true}, '{{ data.moule[0].qte }}'],
+                                                                   [{text:'Heure de livraison', bold:true}, '{{ data.moule[0].time|format_date('%H:%M') }}'],
+                                                                   [{text:'Type cupcake', bold:true}, '{{ data.moule[0].gateau.name_type_gateau() }}']
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                               {% for layer in data.moule[0].composite %}
+                                                                   {% if layer.name_fourage() %}
+                                                                      [{text:'Fourrage', bold:true}, '{{ layer.name_fourage() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_goutcreme() %}
+                                                                      [{text:'Gout de creme', bold:true}, '{{ layer.name_goutcreme() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_imbibage() %}
+                                                                      [{text:'Imbibage', bold:true}, '{{ layer.name_imbibage() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_coulis() %}
+                                                                      [{text:'Coulis', bold:true}, '{{ layer.name_coulis() }}'],
+                                                                   {% endif %}
+                                                               {% endfor %}
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               '{{ data.moule[0].theme }}',
+                                               '{{ data.moule[0].client.get().name }}'
+                                           {% endif %}
+                                       ],
+                                        {% for ml in data.moule %}
+                                        [
+                                           '',
+                                           {% if ml.gateau.type_produit() == 1 %}
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                                   [{text:'Moule', bold:true}, '{{ ml.name }}'],
+                                                                   [{text:'Quantite', bold:true}, '{{ ml.qte }}'],
+                                                                   [{text:'Heure de livraison', bold:true}, '{{ ml.time|format_date('%H:%M') }}']
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                               {% for layer in ml.composite %}
+                                                                   {% if layer.name_goutcreme() %}
+                                                                      [{text:'Gout de creme', bold:true}, '{{ layer.name_goutcreme() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_imbibage() %}
+                                                                      [{text:'Imbibage', bold:true}, '{{ layer.name_imbibage() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_coulis() %}
+                                                                      [{text:'Coulis', bold:true}, '{{ layer.name_coulis() }}'],
+                                                                   {% endif %}
+                                                               {% endfor %}
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               '{{ ml.theme }}',
+                                               '{{ ml.client.get().name }}'
+                                           {% endif %}
+                                            {% if ml.gateau.type_produit() == 2 %}
+                                                 [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                                   [{text:'Moule', bold:true}, '{{ ml.name }}'],
+                                                                   [{text:'Quantite', bold:true}, '{{ ml.qte }}'],
+                                                                   [{text:'Heure de livraison', bold:true}, '{{ ml.time|format_date('%H:%M') }}']
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                               [{text:'Forme de sable', bold:true}, '{{ ml.gateau.name_type_gateau() }}'],
+                                                               [{text:'Couleur de ruban', bold:true}, '{{ ml.gateau.couleur_ruban() }}']
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               '{{ ml.theme }}',
+                                               '{{ ml.client.get().name }}'
+                                           {% endif %}
+                                            {% if ml.gateau.type_produit() == 3 %}
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                                   [{text:'Moule', bold:true}, '{{ ml.name }}'],
+                                                                   [{text:'Quantite', bold:true}, '{{ ml.qte }}'],
+                                                                   [{text:'Heure de livraison', bold:true}, '{{ ml.time|format_date('%H:%M') }}'],
+                                                                   [{text:'Type cupcake', bold:true}, '{{ ml.gateau.name_type_gateau() }}']
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               [
+                                                   {
+                                                       table:{
+                                                           body:[
+                                                               {% for layer in ml.composite %}
+                                                                   {% if layer.name_fourage() %}
+                                                                      [{text:'Fourrage', bold:true}, '{{ layer.name_fourage() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_goutcreme() %}
+                                                                      [{text:'Gout de creme', bold:true}, '{{ layer.name_goutcreme() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_imbibage() %}
+                                                                      [{text:'Imbibage', bold:true}, '{{ layer.name_imbibage() }}'],
+                                                                   {% endif %}
+                                                                   {% if layer.name_coulis() %}
+                                                                      [{text:'Coulis', bold:true}, '{{ layer.name_coulis() }}'],
+                                                                   {% endif %}
+                                                               {% endfor %}
+                                                           ]
+                                                       }
+                                                   }
+                                               ],
+                                               '{{ ml.theme }}',
+                                               '{{ ml.client.get().name }}'
+                                           {% endif %}
+                                        ],
+                                        {% endfor %}
+                                    {% endfor %}
+
+
+
+                            ]
+                      },
+                      layout: {
+														hLineWidth: function(i, node) {
+																return (i === 0 || i === node.table.body.length) ? 2 : 1;
+														},
+														vLineWidth: function(i, node) {
+																return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+														},
+														hLineColor: function(i, node) {
+																return (i === 0 || i === node.table.body.length) ? 'black' : 'gray';
+														},
+														vLineColor: function(i, node) {
+																return (i === 0 || i === node.table.widths.length) ? 'black' : 'gray';
+														}
+														// paddingLeft: function(i, node) { return 4; },
+														// paddingRight: function(i, node) { return 4; },
+														// paddingTop: function(i, node) { return 2; },
+														// paddingBottom: function(i, node) { return 2; }
+						}
+                  }
+              ],
+              defaultStyle: {
+                alignment: 'center'
+              }
+          };
+          pdfMake.createPdf(docDefinition).open();
+
+
+
+     </script>
+ </head>
+ <body>
+
+</body>
+</html>
+
+
+{% endif %}

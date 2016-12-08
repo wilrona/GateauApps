@@ -1,0 +1,18 @@
+<div class="" data-spy="affix" data-offset-top="60">
+   <div class="page-header">
+          <h1 class="text-center">Commandes</h1>
+        </div>
+
+<ul class="nav nav-pills nav-stacked">
+        {% if current_user.has_roles([('super_admin', 'commande')])  %}
+        <li {% if submenu == 'commande' %} class="active" {% endif %}><a href="{{ url_for('commande.index') }}">Toutes les commandes</a></li>
+        {% endif %}
+        {% if current_user.has_roles([('super_admin','livraison_prod')]) %}
+        <li {% if submenu == 'livraison' %} class="active" {% endif %}><a href="{{ url_for('commande.index_livraison') }}">Commande par livraison</a></li>
+        {% endif %}
+        {% if current_user.has_roles([('super_admin','planning_prod')]) %}
+        <li {% if submenu == 'planning' %} class="active" {% endif %}><a href="{{ url_for('planning.index') }}">Planning de production</a></li>
+        {% endif %}
+        <li {% if submenu == 'agenda' %} class="active" {% endif %}><a href="{{ url_for('planning.agenda') }}">Agenda de la production</a></li>
+</ul>
+</div>

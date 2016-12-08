@@ -1,0 +1,9 @@
+<div class="" data-spy="affix" data-offset-top="60">
+    <div class="page-header">
+          <h1 class="text-center">Produits</h1>
+        </div>
+<ul class="nav nav-pills nav-stacked">
+        <li {% if submenu == 'list_gateau' %} class="active" {% endif %}><a href="{{ url_for('gateau.index') }}">Gateaux</a></li>
+        <li {% if submenu == 'prix_gateau' %} class="active" {% endif %}><a href="{{ url_for('gateau.param_price') }}">Parametres des prix de gateaux</a></li>
+</ul>
+</div>

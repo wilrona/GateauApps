@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+
+{% block layout_content %}
+
+<div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Facture : {{ commande.ref }}</h1>
+              {% include 'includes/flash_message.html' %}
+            </div>
+            <nav class="navbar navbar-toolbar" role="navigation">
+              <div class="container-fluid">
+                <div class="btn-toolbar" role="toolbar">
+                  {% if current_user.has_roles([('super_admin', 'update_facture')]) %}
+                  <div class="btn-group pull-right">
+                    <a href="{{ url_for('commande.UpdateCommande', id_commande=id_commande) }}" class="btn btn-warning {% if not update %} disabled {% endif %}" >Modifier</a>
+                  </div>
+                  {% endif %}
+                  <div class="btn-group pull-right">
+                    <a href="{{ url_for('commande.check_pin', url="url_annuler") }}" id="url_annuler" data-url="{{ url_for('commande.facture_annuler', id_commande=id_commande) }}" data-toggle="modal" data-target="#myModal" data-backdrop="static" class="btn {% if not current_user.has_roles([('super_admin', 'annuler_facture_commande')]) or (not update and not commande.annule) %} disabled {% endif %}
+                        {% if not commande.annule %}
+                            btn-danger" >
+                            Annuler commande
+                        {% else %}
+                            btn-warning" >
+                            Relancer commande
+                        {% endif %}
+                    </a>
+                  </div>
+                  <div class="btn-group pull-right">
+                    <a href="{{ url_for('commande.facture_versement', id_commande=id_commande) }}" class="btn btn-info {% if not current_user.has_roles([('super_admin', 'versement_facture')]) %} disabled {% endif %}">Versements</a>
+                  </div>
+                  <div class="btn-group pull-right">
+                    <a href="{{ url_for('commande.index') }}" class="btn btn-default" >Retour a la liste</a>
+                  </div>
+                </div>
+              </div>
+            </nav>
+            <div class="row">
+                <div class="col-lg-6">
+                            <h3 class="text-center">Information du client</h3><hr/>
+                            <div class="form-horizontal">
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Nom et prenom :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ commande.user.get().name }}</p>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Telephone :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ commande.user.get().phone }}</p>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Adresse email :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ commande.user.get().email }}</p>
+                                    </div>
+                                  </div>
+                            </div>
+                </div>
+                <div class="col-lg-6">
+                            <h3 class="text-center">Information sur l'evenement</h3><hr/>
+                            <div class="form-horizontal">
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Evenement :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ commande.event_id.get().name }}</p>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Theme :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ commande.theme }}</p>
+                                    </div>
+                                  </div>
+                                {% if commande.event_id.get().at_date %}
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Raison :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">Pour <strong>{{ commande.nameConcerne }}</strong> en date du {{ commande.dateAnniv|format_date('%d/%m/%Y') }} </p>
+                                    </div>
+                                  </div>
+                                {% endif %}
+                            </div>
+                </div>
+{##}
+                <div class="col-lg-12">
+                    <br/>
+                            <h3 class="text-center">Information sur la livraison</h3><hr/>
+                            <div class="form-horizontal">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="col-sm-5 control-label">Date de livraison :</label>
+                                        <div class="col-sm-7">
+                                          <p class="form-control-static">{{ commande.dateLiv|format_date('%d/%m/%Y') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="col-sm-5 control-label">Heure de livraison :</label>
+                                        <div class="col-sm-7">
+                                          <p class="form-control-static">{{ commande.timeLiv|format_date('%H:%M') }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="col-sm-5 control-label">Infos complementaire :</label>
+                                        <div class="col-sm-7">
+                                          <p class="form-control-static">{{ commande.infos }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                </div>
+{##}
+                <div class="col-lg-12">
+                    <br/>
+                    <div class="btn-toolbar" role="toolbar">
+                        <div class="btn-group">
+                            <h2 style="margin: 0;">Information sur les produits</h2>
+                        </div>
+                    {% if update %}
+                      <div class="btn-group pull-right">
+                        <a href="{{ url_for('commande.updateCupcake', id_commande=id_commande) }}" class="btn btn-primary">Ajouter un cupcake</a>
+                      </div>
+                      <div class="btn-group pull-right">
+                        <a href="{{ url_for('commande.updateSable', id_commande=id_commande) }}" class="btn btn-primary">Ajouter un sable</a>
+                      </div>
+                      <div class="btn-group pull-right">
+                        <a href="{{ url_for('commande.updateGateaux', id_commande=id_commande) }}" class="btn btn-primary">Ajouter un gateau</a>
+                      </div>
+                    {% endif %}
+                    </div>
+                    <hr/>
+                    <table class="table table-condensed">
+                        <thead>
+                        <tr>
+                            <th width="35%">Produit</th>
+                            <th width="15%" class="text-center">Qte</th>
+                            <th width="20%" class="text-center">Montant</th>
+                            <th width="1%"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                                     {% for produit in produit_commande %}
+
+                                         {% if produit.produit_id.get().type_produit == 1 %}
+                                             <tr {% if produit.annule %} class="danger"{% endif %}>
+                                                 <td>{{ produit.produit_id.get().name }} -  <strong>{{ produit.typeGateau_id.get().name }}</strong> <br/>
+                                                 <strong>Categorie:</strong> {{ produit.categorie_id.get().name }} <br/>
+                                                 {% set moule_count = 1 %}
+                                                 {% for moule in produit.list_moule_NIden()  %}
+                                                    <strong>moule {{ moule_count }} :</strong> (<strong>Type:</strong> {{ moule.name_moule() }}, <strong>Qte:</strong> {{ moule.qte }}
+                                                     ,
+                                                     {% set layer_count = 1 %}
+                                                     {% for layer in moule.list_composition()  %}
+                                                             <strong> Layer {{ layer_count }}: </strong> {{ layer.name_goutcreme() }}
+                                                             {% if layer.imbibage_id %} {{ layer.name_imbibage() }} {% endif %}
+                                                             {% if layer.coulis_id %} {{ layer.name_coulis() }} {% endif %}
+                                                             {% set layer_count =  layer_count + 1 %}
+                                                     {% endfor %}
+                                                     )
+                                                     <br/>
+                                                    {% set moule_count =  moule_count + 1 %}
+                                                     {% if moule.nbre_identique_count() %}
+                                                        {% for identique in moule.nbre_identique() %}
+                                                           <strong>moule {{ moule_count }}</strong> - Layer identique aux layers du <strong>moule {{ (moule_count - 1) }}</strong> (<strong>Type:</strong> {{ identique.name_moule() }}, <strong>Qte:</strong> {{ identique.qte }})
+                                                             <br/>
+                                                            {% set moule_count =  moule_count + 1 %}
+                                                        {% endfor %}
+                                                     {% endif %}
+                                                 {% endfor %}
+                                                 {% if produit.impression and not produit.pate %} Impression <br/> {% endif %}
+                                                 {% if produit.pate and not produit.impression %} Pate <br/> {% endif %}
+                                                 {% if produit.pate and produit.impression %} Impression & Pate <br/> {% endif %}
+                                                 <strong>Observation:</strong>{{ produit.observation }}
+                                                 </td>
+                                                 <td class="text-center">[{{ list_part[produit.nbrPart] }}] </td>
+                                                 <td class="text-center">{{ produit.prix|format_price() }} FCFA </td>
+                                                 <td>
+                                                     {% if current_user.has_roles([('super_admin', 'update_facture')]) %}
+                                                         <a href="{{ url_for('commande.updateGateaux', id_commande=id_commande, gateau_id=produit.key.id()) }}" class=" btn {% if not update %} disabled  {% endif %}"><i class="glyphicon glyphicon-pencil"></i></a>
+                                                     {% endif %}
+                                                 </td>
+
+                                             </tr>
+                                         {% endif %}
+                                         {% if produit.produit_id.get().type_produit == 2 %}
+                                             <tr {% if produit.annule %} class="danger"{% endif %}>
+                                                 <td>{{ produit.produit_id.get().name }} -  <strong>{{ produit.typeGateau_id.get().name }} {{ produit.couleurRuban_id.get().name }}</strong>
+                                                     <br/>
+                                                     {% if produit.emballage %} Emballage, <br/>{% else %} Sans Emballage, <br/>{% endif %}
+                                                     {% if produit.impression and not produit.pate %} Impression <br/>{% endif %}
+                                                     {% if produit.pate and not produit.impression %} Pate <br/>{% endif %}
+                                                     {% if produit.pate and produit.impression %} Impression & Pate <br/>{% endif %}
+
+                                                     <strong>Observation:</strong>{{ produit.observation }}
+
+                                                 </td>
+                                                 <td class="text-center">{{ produit.qte }} </td>
+                                                 <td class="text-center">{{ produit.prix|format_price() }} FCFA </td>
+                                             <td>
+                                                 {% if current_user.has_roles([('super_admin', 'update_facture')]) %}
+                                                         <a href="{{ url_for('commande.updateSable', id_commande=id_commande, gateau_id=produit.key.id()) }}" class=" btn {% if not update %} disabled  {% endif %}"><i class="glyphicon glyphicon-pencil"></i></a>
+                                                     {% endif %}
+                                             </td>
+                                             </tr>
+                                         {% endif %}
+                                         {% if produit.produit_id.get().type_produit == 3 %}
+                                             <tr {% if produit.annule %} class="danger"{% endif %}>
+                                                 <td>{{ produit.produit_id.get().name }} -  <strong>{{ produit.typeGateau_id.get().name }}</strong>
+                                                     <br/>
+                                                     {% for compos in produit.list_composition() %}
+                                                        <strong>Gout de creme :</strong> {{ compos.name_goutcreme() }},
+                                                        <strong>Fourrage :</strong> {{ compos.name_fourage() }}
+                                                         {% if compos.coulis_id %}
+                                                             <strong>Coulis :</strong> {{ compos.name_coulis() }}
+                                                         {% endif %}
+                                                         {% if compos.imbibage_id %}
+                                                             <strong>Imbibage :</strong> {{ compos.name_imbibage() }}
+                                                         {% endif %}
+                                                         {% if compos.topping_id %}
+                                                             <strong>Topping :</strong> {{ compos.name_topping() }}
+                                                         {% endif %}
+                                                         {% if compos.couleur_cup_id %}
+                                                             <strong>Couleur Cup :</strong> {{ compos.name_couleur_cup() }}
+                                                        {% endif %}
+                                                     {% endfor %}
+                                                 </td>
+                                                 <td class="text-center">{{ produit.qte }} </td>
+                                                 <td class="text-center">{{ produit.prix|format_price() }} FCFA </td>
+                                             <td>
+                                                 {% if current_user.has_roles([('super_admin', 'update_facture')]) %}
+                                                         <a href="{{ url_for('commande.updateCupcake', id_commande=id_commande, gateau_id=produit.key.id()) }}" class=" btn {% if not update %} disabled  {% endif %}"><i class="glyphicon glyphicon-pencil"></i></a>
+                                                     {% endif %}
+                                             </td>
+                                             </tr>
+                                         {% endif %}
+                                     {% else %}
+                                         <tr>
+                                             <td colspan="4">
+                                                 <h3 class="text-center">Aucun produit</h3>
+                                             </td>
+                                         </tr>
+                                    {% endfor %}
+
+                                     </tbody>
+                                     <tfooter>
+                                          <tr>
+                                              <td></td>
+                                             <td  class="text-right"><strong>Montant Total</strong></td>
+                                             <td class="text-center"> <strong>{{ total|format_price() }} FCFA</strong> </td>
+                                              <td></td>
+                                         </tr>
+                                         <tr>
+                                             <td></td>
+                                             <td class="text-right"><strong>Accompte</strong></td>
+                                             <td class="text-center"> <strong>{{ accompte|format_price() }} FCFA</strong>  </td>
+                                             <td></td>
+                                         </tr>
+                                         <tr>
+                                             <td></td>
+                                             <td class="text-right"><strong>Reste à payer</strong></td>
+                                             <td class="text-center"> <strong>{{ total_accompte|format_price() }} FCFA</strong> </td>
+                                             <td></td>
+                                         </tr>
+                                     </tfooter>
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+</div>
+
+{% endblock %}

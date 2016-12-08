@@ -1,0 +1,71 @@
+
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+{% block layout_content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Facture : {{ commande.ref }}</h1>
+              {% include 'includes/flash_message.html' %}
+            </div>
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Versemment de la commande {{ commande.ref }} </h4>
+</div>
+<form class="form-horizontal" role="form" method="post" action="{{ url_for('commande.facture_versement', id_commande=id_commande) }}" id="FormulaireToSend">
+    <div class="modal-body">
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Date versement</th>
+                <th colspan="2">Montant</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for versement in versements %}
+                <tr>
+                    <td>{{ versement.dateVers|format_date('%d/%m/%Y') }}</td>
+                    <td>{{ versement.montant|format_price() }} FCFA</td>
+                    <td>
+                        {% if versement.dateVers >= current_date %}
+                            <a class="btn btn-default btn-xs" href="{{ url_for('commande.check_pin', url="url") }}" id="url" data-url="{{ url_for('commande.facture_versement', id_commande=id_commande, delete=versement.key.id()) }}" data-toggle="modal" data-target="#myModal" data-backdrop="static">supprimer</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                 <tr>
+                    <td colspan="3">
+                        <h4 class="text-center">Aucune information</h4>
+                    </td>
+                 </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="page-header">
+          <span class="pull-right text-danger"><strong>Reste a payer :</strong> {{ total_a_payer|format_price() }} FCFA</span><strong>Total payee :</strong> {{ accompte|format_price() }} FCFA
+        </div>
+        <div class="form-group">
+            <label class="col-sm-4 control-label">Faites un versement :</label>
+            <div class="col-sm-6">
+                <input type="number" class="form-control" name="versement" placeholder="Montant du versement" id="input_versement"{% if total_a_payer == 0 %} disabled="disabled" {% endif %}/>
+                <input type="hidden" name="user" id="input_user"/>
+            </div>
+            <div class="col-sm-2">
+                <a class="btn btn-primary {% if total_a_payer == 0 %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static" href="{{ url_for('commande.check_pin') }}">Enregistrer</a>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <a class="btn btn-danger" href="{{ url_for('commande.facture', id_commande=id_commande) }}">Retour</a>
+    </div>
+</form>
+    </div>
+</div>
+
+{% endblock %}

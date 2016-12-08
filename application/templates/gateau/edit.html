@@ -1,0 +1,54 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Creation/Modification</h4>
+
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire">
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="form-group">
+                    <label for="" class='col-sm-3 control-label'>Definition du prix :</label>
+                    <div class="col-sm-9">
+                        <input type="number" name="prix" value="{% if gateau.prix %}{{ gateau.prix }}{% endif %}" class="form-control" id="enter" min="1"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('gateau.edit', gateau_id=gateau_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    $('#enter').keypress(function(e) {
+        if (e.which == 13){
+            e.preventDefault();
+            $.ajax({
+                url: "{{ url_for('gateau.edit', gateau_id=gateau_id) }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+        }
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('gateau.index') }}").delay();
+    {% endif %}
+</script>

@@ -1,0 +1,65 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Verification code pin</h4>
+</div>
+<form class="form-horizontal" role="form" id="submitFormulaire">
+<div class="modal-body">
+
+<div class="form-group">
+    {% if request.method == 'POST' and not send %}
+            <div class="alert alert-success" role="alert">
+                Ce code pin ne correspond à aucun utilisateur du système.
+            </div>
+    {% endif %}
+            <label class="col-sm-4 control-label">votre code pin :</label>
+            <div class="col-sm-6">
+                <input type="number" class="form-control" name="code" placeholder="4444" autocomplete="off"/>
+            </div>
+            <div class="col-sm-2">
+                <button id="submits" class="btn btn-success">Validez</button>
+            </div>
+        </div>
+ </div>
+</form>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-dismiss="modal" id="close">Fermer</button>
+</div>
+
+<script>
+   $('#submits').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('commande.check_pin', url=url) }}",
+                data: $('#submitFormulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+        });
+   });
+
+   {% if send and url %}
+
+        var url = $("#"+"{{ url }}").data('url');
+
+       var the_split = url.split("?");
+       var user;
+       if (the_split.length > 1){
+           user = "&user={{ user.key.id() }}";
+       }else{
+           user = "?user={{ user.key.id() }}";
+       }
+
+        window.location.replace(window.location.origin+url+user).delay();
+        $('#close').trigger('click');
+   {% endif %}
+
+   {% if send and not url %}
+       if($('#input_versement').val() == ""){
+           $('#input_versement').parent().parent().addClass('has-error');
+           $('#close').trigger('click');
+       }else{
+           $("#input_user").val('{{ user.key.id() }}');
+           $('#FormulaireToSend').submit();
+       }
+   {% endif %}
+</script>

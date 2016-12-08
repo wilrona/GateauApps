@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+
+{% block layout_content %}
+
+<div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Modification du gateaux </h1>
+            </div>
+            <div class="col-lg-10 col-lg-offset-1">
+
+                <form class="form-horizontal" id="FormulaireToSend" method="post" action="{{ url_for('commande.updateGateaux', id_commande=id_commande, gateau_id=gateau_id) }}">
+                    <input type="hidden" name="user" id="input_user"/>
+                    <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Liste des categories :</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                                <select class="form-control g-select" name="categorie" id="categorie" required>
+                                    <option value="">Selectionnez une categorie de gateau</option>
+                                    {% for categorie in categorie_list %}
+                                  <option value="{{ categorie.key.id() }}" {% if gateau_id and current_gateau.categorie_id.get().key.id()|int == categorie.key.id()  %} selected {% endif %}>{{ categorie.name }}</option>
+                                    {% endfor %}
+                                </select>
+                          </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Nombre de part : </label>
+                        <div class="col-sm-8">
+                          <select  class="form-control g-select" name="interval" id="interval" required >
+                                <option value="">Selectionnez le nombre de part</option>
+                                {% for key, val in list_part.items()|sort %}
+                                    <option value="{{ key }}" {% if gateau_id and current_gateau.nbrPart == key %} selected {% endif %}>{{ val }}</option>
+                                {% endfor %}
+                          </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Type de Gateaux :</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                                <select class="form-control g-select" name="typegateaux" id="typegateaux" required >
+                                    <option value="">Selectionnez un type de gateaux</option>
+                                    {% for typegateaux in typegateau_list %}
+                                       <option value="{{ typegateaux.key.id() }}" {% if gateau_id and current_gateau.typeGateau_id.get().key.id()|int == typegateaux.key.id() %} selected {% endif %}>{{ typegateaux.name }}</option>
+                                    {% endfor %}
+                                </select>
+                          </div>
+                    </div>
+{##}
+                    <div class="page-header">
+                      <a href="#" class="btn btn-primary pull-right" id="add_moule">Ajouter un moule</a>
+                      <h3>Choisir les moules </h3>
+                    </div>
+                    {% if gateau_id %}
+{##}                    <div id="moule_delete">
+                        </div>
+
+                        {% set count = current_gateau.list_moule_NIden_Count() %}
+                        {% for moules in  current_gateau.list_moule_NIden() %}
+
+                            <div class="panel panel-default moule" id="{{ moules.key.id() }}">
+                                <div class="panel-heading">
+                                    {% if count >= 1 %} <button type="button" class="close {% if count == 1 and count < 2 %} hidden {% endif %}" aria-label="Close" id="close_moule"><span aria-hidden="true">&times;</span></button> {% endif %}
+                                    <strong><a href="#{{ (loop.index) }}" data-toggle="collapse" data-parent="#accordion">Moule {{ (loop.index) }}</a></strong>
+                                </div>
+                                <div class="panel-body panel-collapse collapse" id="{{ (loop.index) }}">
+                                    <div id="moule_identique_delete"></div>
+                                    <div id="moule_layer_delete"></div>
+                                    <div class="row">
+                                        <div class="col-lg-5">
+                                            <div class="form-group">
+                                              <label for="" class="col-sm-4" style="padding-top:3px; "> Choix :</label>
+                                              <div class="col-lg-8" style="padding-top:3px; ">
+                                                    <select class="form-control" name="moule_choix" required>
+                                                        <option value="">Choix de moule</option>
+                                                        {% for moule in moule_list %}
+                                                           <option value="{{ moule.key.id() }}" {% if moules.moule_id.get().key.id()|int == moule.key.id() %} selected {% endif %}>{{ moule.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                              </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                              <label for="" class="col-sm-4" style="padding-top:3px; ">Quantite :</label>
+                                              <div class="col-lg-8" style="padding-top:3px; ">
+                                                  <input class="form-control input-sm" type="number" name="qte_moule" value="{{ moules.qte }}" required="required" min="1"/>
+                                              </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-1">
+                                            <a href="#" class="btn btn-link" id="add_identique"><i class="glyphicon glyphicon-duplicate"></i></a>
+                                            <input type="hidden" name="identique_moule" value="{{ moules.nbre_identique_count() }}" class="identique_moule"/>
+                                        </div>
+                                    </div>
+                                    {% for identique in moules.nbre_identique() %}
+                                        <div class="row" id="{{ identique.key.id() }}">
+                                            <div class="col-lg-5">
+                                                <div class="form-group">
+                                                  <label for="" class="col-sm-4" style="padding-top:3px; "> Choix :</label>
+                                                  <div class="col-lg-8" style="padding-top:3px; ">
+                                                        <select class="form-control" name="moule_choix_identique" required>
+                                                            <option value="">Choix de moule</option>
+                                                            {% for moule in moule_list %}
+                                                               <option value="{{ moule.key.id() }}" {% if identique.moule_id.get().key.id()|int == moule.key.id() %} selected {% endif %}>{{ moule.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                  </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                  <label for="" class="col-sm-4" style="padding-top:3px; ">Quantite :</label>
+                                                  <div class="col-lg-8" style="padding-top:3px; ">
+                                                      <input class="form-control input-sm" type="number" name="qte_moule_identique" value="{{ identique.qte }}" required="required" min="1"/>
+                                                  </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-1">
+                                                <a href="#" class="btn btn-link remove_identique"><i class="glyphicon glyphicon-minus"></i></a>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    <div class="col-lg-10 col-lg-offset-1">
+                                        <div class="page-header" style="margin-top: 20px;">
+                                          <a href="#" class="btn btn-primary pull-right btn-sm add_layer">Ajouter un layer</a>
+                                          <h4>Les layers </h4>
+                                          <input type="hidden" name="nbre_layer" value="{{ moules.list_composition_count() }}" class="nbre_layer"/>
+                                        </div>
+                                        {% for layers in moules.list_composition() %}
+                                        <div class="panel panel-default layer" id="{{ layers.key.id() }}">
+
+                                            <div class="panel-heading">
+                                                {% if  moules.list_composition_count() >= 1 %} <button type="button" class="close {% if moules.list_composition_count() == 1 and moules.list_composition_count() < 2 %} hidden {% endif %}" aria-label="Close" id="close_layer"><span aria-hidden="true">&times;</span></button> {% endif %}
+                                                <strong>Layer {{ (loop.index) }}</strong>
+                                            </div>
+                                            <div class="panel-body">
+                                                <div class="form-group">
+                                                  <label for="" class="col-sm-4" style="padding-top:3px; ">Gout creme :</label>
+                                                  <div class="col-lg-8" style="padding-top:3px; ">
+                                                        <select class="form-control" name="gout_creme" required>
+                                                            <option value="">Choix gout creme</option>
+                                                            {% for gout_creme in gout_creme_list %}
+                                                               <option value="{{ gout_creme.key.id() }}" {% if  layers.goutcreme_id.get().key.id()|int == gout_creme.key.id() %} selected {% endif %}>{{ gout_creme.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                  </div>
+                                                </div>
+                                                <div class="form-group">
+                                                  <label for="" class="col-sm-4" style="padding-top:3px; ">Imbibage :</label>
+                                                  <div class="col-lg-8" style="padding-top:3px; ">
+                                                        <select class="form-control" name="imbibage" required>
+                                                            <option value="0" {% if not layers.imbibage_id %} selected {% endif %}>Aucun</option>
+                                                            {% for imbibage in imbibage_list %}
+                                                               <option value="{{ imbibage.key.id() }}" {% if layers.imbibage_id and layers.imbibage_id.get().key.id()|int == imbibage.key.id() %} selected {% endif %}>{{ imbibage.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                  </div>
+                                                </div>
+                                                <div class="form-group">
+                                                  <label for="" class="col-sm-4" style="padding-top:3px; ">Coulis :</label>
+                                                  <div class="col-lg-8" style="padding-top:3px; ">
+                                                        <select class="form-control" name="coulis" required>
+                                                            <option value="0" {% if not layers.coulis_id %} selected {% endif %}>Aucun</option>
+                                                            {% for coulis in coulis_list %}
+                                                               <option value="{{ coulis.key.id() }}" {% if layers.coulis_id and layers.coulis_id.get().key.id()|int == coulis.key.id() %} selected {% endif %}>{{ coulis.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                  </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                        {% endfor %}
+
+                        <script>
+                            var moule = {{ count }};
+                        </script>
+                    {% else %}
+                            <div class="panel panel-default moule">
+                                <div class="panel-heading">
+                                    <button type="button" class="close hidden" aria-label="Close" id="close_moule"><span aria-hidden="true">&times;</span></button>
+                                    <strong><a href="#1" data-toggle="collapse" data-parent="#accordion">Moule 1</a></strong>
+                                </div>
+                                <div class="panel-body panel-collapse collapse in" id="1">
+                                    <div class="row">
+                                        <div class="col-lg-5">
+                                            <div class="form-group">
+                                              <label for="" class="col-sm-4" style="padding-top:3px; "> Choix :</label>
+                                              <div class="col-lg-8" style="padding-top:3px; ">
+                                                    <select class="form-control" name="moule_choix" required>
+                                                        <option value="">Choix de moule</option>
+                                                        {% for moule in moule_list %}
+                                                           <option value="{{ moule.key.id() }}" {% if (request.form['moule_choix'] and request.form['moule_choix']|int == moule.key.id()) %} selected {% endif %}>{{ moule.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                              </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                              <label for="" class="col-sm-4" style="padding-top:3px; ">Quantite :</label>
+                                              <div class="col-lg-8" style="padding-top:3px; ">
+                                                  <input class="form-control input-sm" type="number" name="qte_moule" value="{{ request.form['qte_moule'] }}" required="required" min="1"/>
+                                              </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-1">
+                                            <a href="#" class="btn btn-link" id="add_identique"><i class="glyphicon glyphicon-duplicate"></i></a>
+                                            <input type="hidden" name="identique_moule" value="0" class="identique_moule"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-10 col-lg-offset-1">
+                                        <div class="page-header" style="margin-top: 20px;">
+                                          <a href="" class="btn btn-primary pull-right btn-sm add_layer">Ajouter un layer</a>
+                                          <h4>Les layers </h4>
+                                          <input type="hidden" name="nbre_layer" value="1" class="nbre_layer"/>
+                                        </div>
+                                        <div class="panel panel-default layer">
+                                            <div class="panel-heading">
+                                                <button type="button" class="close hidden" aria-label="Close" id="close_layer"><span aria-hidden="true">&times;</span></button>
+                                                <strong>Layer 1</strong>
+                                            </div>
+                                            <div class="panel-body">
+                                                <div class="form-group">
+                                                  <label for="" class="col-sm-4" style="padding-top:3px; ">Gout creme :</label>
+                                                  <div class="col-lg-8" style="padding-top:3px; ">
+                                                        <select class="form-control" name="gout_creme" required>
+                                                            <option value="">Choix gout creme</option>
+                                                            {% for gout_creme in gout_creme_list %}
+                                                               <option value="{{ gout_creme.key.id() }}" {% if (request.form['gout_creme'] and request.form['gout_creme']|int == gout_creme.key.id()) %} selected {% endif %}>{{ gout_creme.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                  </div>
+                                                </div>
+                                                <div class="form-group">
+                                                  <label for="" class="col-sm-4" style="padding-top:3px; ">Imbibage :</label>
+                                                  <div class="col-lg-8" style="padding-top:3px; ">
+                                                        <select class="form-control" name="imbibage" required>
+                                                            <option value="0">Aucun</option>
+                                                            {% for imbibage in imbibage_list %}
+                                                               <option value="{{ imbibage.key.id() }}" {% if (request.form['imbibage'] and request.form['imbibage']|int == imbibage.key.id()) %} selected {% endif %}>{{ imbibage.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                  </div>
+                                                </div>
+                                                <div class="form-group">
+                                                  <label for="" class="col-sm-4" style="padding-top:3px; ">Coulis :</label>
+                                                  <div class="col-lg-8" style="padding-top:3px; ">
+                                                        <select class="form-control" name="coulis" required>
+                                                            <option value="0">Aucun</option>
+                                                            {% for coulis in coulis_list %}
+                                                               <option value="{{ coulis.key.id() }}" {% if (request.form['coulis'] and request.form['coulis']|int == coulis.key.id()) %} selected {% endif %}>{{ coulis.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                  </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <script>
+                                var moule =  1 ;
+                            </script>
+                    {% endif %}
+
+{#
+{##}
+                    <div class="form-group">
+                        <label for="" class="col-sm-4">Decoration : </label>
+                        <div class="col-sm-8">
+                            <div class="checkbox">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="impression" {% if  gateau_id and current_gateau.impression %} checked {% endif %}/> <label for="">Impression Alimentaire</label>
+                                </label>
+                            </div>
+                            <div class="checkbox">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="pate" {% if  gateau_id and current_gateau.pate %} checked {% endif %}/> <label for="">Pate a sucre</label>
+                                </label>
+                            </div>
+                        </div>
+                      </div>
+                    <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Observation :</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                              <textarea name="observation" id="" cols="60" rows="10" class="form-control" style="resize:none;">{% if gateau_id and current_gateau.observation %} {{ current_gateau.observation }} {% endif %}</textarea>
+                          </div>
+                    </div>
+                     <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Prix de vente :</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                              <input type="number" name="prix" class="form-control" value="{% if gateau_id %}{{ current_gateau.prix }}{% endif %}" required/>
+                          </div>
+                    </div>
+                    <hr/>
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-lg-8">
+                          <a class="btn btn-danger" href="{{ url_for('commande.facture', id_commande=id_commande) }}">Annuler</a>
+                          <a class="btn btn-success disabled" id="submit" data-toggle="modal" data-target="#myModal" data-backdrop="static" href="{{ url_for('commande.check_pin') }}">Valider</a>
+
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+
+        </div>
+</div>
+
+{% endblock %}
+
+{% block footer_script %}
+    <script>
+         $('#categorie, #interval, #typegateaux').on('change', function(){
+            if($('#categorie').val() && $('#interval').val() && $('#typegateaux').val()){
+                $('#submit').removeClass('disabled');
+            }else{
+                $('#submit').addClass('disabled');
+            }
+         })
+         if($('#categorie').val() && $('#interval').val() && $('#typegateaux').val()){
+                $('#submit').removeClass('disabled');
+            }else{
+                $('#submit').addClass('disabled');
+            }
+
+
+
+
+         $(document).ready(function() {
+            $('#add_moule').on('click', function(e){
+                e.preventDefault();
+                moule++;
+                $.ajax({
+                    url:'{{ url_for('commande.moule') }}?nbre='+moule,
+                    type: 'GET',
+                    success: function(data) {
+                        if(moule > 1){
+                            $('.moule:last button#close_moule').removeClass('hidden');
+                        }
+                        $('.moule:last').after(data).fadeIn('slow');
+
+                    }
+                });
+            });
+
+             $('body').on('click', '#add_identique', function(e){
+                e.preventDefault();
+                 var $current = $(this);
+                $.ajax({
+                    url:'{{ url_for('commande.identique_moule') }}',
+                    type: 'GET',
+                    success: function(data) {
+                        var $parent = $current.parent().parent().parent();
+                        $parent.find('.row:last').after(data).fadeIn('slow');
+
+                        var $identic_val = parseInt($parent.find('.identique_moule').val());
+                        $identic_val++;
+                        $parent.find('.identique_moule').val($identic_val);
+
+                    }
+                });
+            });
+
+            $('body').on('click', '.remove_identique', function(e){
+                e.preventDefault();
+
+                var $remove_id = $(this).parent().parent();
+
+                var $identic_val = parseInt($remove_id.parent().find('.identique_moule').val());
+                $identic_val--;
+                $remove_id.parent().find('.identique_moule').val($identic_val);
+
+                if($remove_id.attr('id')){
+                    $('#moule_identique_delete').append('<input type="hidden" name="moule_identique_delete" value="'+$remove_id.attr('id')+'"/>');
+                }
+                $remove_id.remove();
+
+
+            });
+
+            $('body').on('click', '.add_layer', function (e) {
+
+                e.preventDefault();
+                var current_moule = $(this).parent().parent();
+
+                var nbrlayer = current_moule.find('.nbre_layer');
+
+                nbrlayer = parseInt(nbrlayer.val());
+                nbrlayer++;
+                var last_layer = current_moule.find('.layer:last');
+
+                $.ajax({
+                    url:'{{ url_for('commande.layer') }}?nbre='+nbrlayer,
+                    type: 'GET',
+                    success: function(data) {
+
+                        last_layer.after(data).fadeIn('slow');
+                        current_moule.find('.nbre_layer').val(nbrlayer);
+                        if(nbrlayer > 1){
+                            last_layer.find('button#close_layer').removeClass('hidden');
+                        }
+
+                    }
+                });
+
+
+            });
+
+            $('body').on('click', '.close', function (e) {
+                e.preventDefault();
+                var $current_moule = $(this).parent().parent();
+                var $current_id = $(this).parent();
+                var $nbr_layer;
+                if ($current_moule.hasClass('layer')) {
+                    $nbr_layer = $current_moule.parent().find('.nbre_layer');
+                    $nbr_layer = parseInt($nbr_layer.val());
+                    $nbr_layer = $nbr_layer - 1;
+                    $current_moule.parent().find('.nbre_layer').val($nbr_layer);
+
+                    $current_moule.parent().find('.layer:last .panel-heading strong').text('Layer ' + $nbr_layer);
+
+                    if ($current_moule.attr('id')) {
+                        $('#moule_layer_delete').append('<input type="hidden" name="moule_layer_delete" value="' + $current_moule.attr('id') + '"/>');
+                    }
+                    if ($nbr_layer == 1) {
+                        $current_moule.parent().find('.layer button#close_layer').addClass('hidden');
+                    }
+
+                }
+                if($current_moule.hasClass('moule')){
+                    moule--;
+                    $current_moule.parent().find('.moule:last .panel-heading strong a').text('Moule '+moule);
+                    if($current_moule.attr('id')){
+                        $('#moule_delete').append('<input type="hidden" name="moule_delete" value="'+$current_moule.attr('id')+'"/>');
+                    }
+                    if(moule == 1){
+                        $current_moule.parent().find('.moule button#close_moule').addClass('hidden');
+                    }
+                }
+                $current_moule.hide('slow').remove();
+            });
+         });
+{#        window.onbeforeunload = function() {#}
+{#          return "Data will be lost if you leave the page, are you sure?";#}
+{#        };#}
+    </script>
+
+{% endblock %}

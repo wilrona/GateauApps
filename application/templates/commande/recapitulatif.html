@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+
+{% block layout_content %}
+
+<div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Creer une commande 3/3 </h1>
+              {% include 'includes/flash_message.html' %}
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                            <h3 class="text-center">Information du client</h3><hr/>
+                            <div class="form-horizontal">
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Nom et prenom :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ session.get('client_commande').name }}</p>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Telephone :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ session.get('client_commande').phone }}</p>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Adresse email :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ session.get('client_commande').email }}</p>
+                                    </div>
+                                  </div>
+                            </div>
+                </div>
+                <div class="col-lg-6">
+                            <h3 class="text-center">Information sur l'evenement</h3><hr/>
+                            <div class="form-horizontal">
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Evenement :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ session.get('evenement_commande').event_name }}</p>
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Theme :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">{{ session.get('evenement_commande').theme }}</p>
+                                    </div>
+                                  </div>
+                                {% if session.get('evenement_commande').exixt_at_date %}
+                                  <div class="form-group">
+                                    <label class="col-sm-5 control-label">Raison :</label>
+                                    <div class="col-sm-7">
+                                      <p class="form-control-static">Pour <strong>{{ session.get('evenement_commande').concerne }}</strong> en date du {{ session.get('evenement_commande').date_anniv }} </p>
+                                    </div>
+                                  </div>
+                                {% endif %}
+                            </div>
+                </div>
+
+                <div class="col-lg-12">
+                    <br/>
+                            <h3 class="text-center">Information sur la livraison</h3><hr/>
+                            <div class="form-horizontal">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="col-sm-5 control-label">Date de livraison :</label>
+                                        <div class="col-sm-7">
+                                          <p class="form-control-static">{{ session.get('evenement_commande').date_liv }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="col-sm-5 control-label">Heure de livraison :</label>
+                                        <div class="col-sm-7">
+                                          <p class="form-control-static">{{ session.get('evenement_commande').heure_liv }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="col-sm-5 control-label">Infos complementaire :</label>
+                                        <div class="col-sm-7">
+                                          <p class="form-control-static">{{ session.get('evenement_commande').autre }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                </div>
+
+                <div class="col-lg-12">
+                    <br/>
+                    <h3 class="text-center">Information sur les produits</h3><hr/>
+                    <table class="table table-condensed">
+                        <thead>
+                        <tr>
+                            <th width="35%">Produit</th>
+                            <th width="15%" class="text-center">Qte</th>
+                            <th width="20%" class="text-center">Montant</th>
+                            <th width="1%"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                                     {% for produit in liste_commande %}
+                                         {% if produit.type_produit == '1' %}
+                                             <tr>
+                                                 <td>{{ produit.type_produit_id}} -  <strong>{{ produit.type_gateau_name }}</strong><br/>
+                                                     <strong>Categorie:</strong> {{ produit.categorie_name }} <br/>
+                                                     {% set moule_count = 1 %}
+                                                     {% for moule in produit.moule  %}
+                                                         moule {{ moule_count }} (<strong>Type:</strong> {{ moule['choix_name'] }}, <strong>Qte:</strong> {{ moule['qte'] }}
+                                                         , {% set layer_count = 1 %}
+                                                         {% for layer in moule.layer  %}
+                                                             <strong> Layer {{ layer_count }}: </strong> {{ layer['gout_creme_name'] }}
+                                                             {% if layer['imbibage'] %} {{ layer['imbibage_name'] }} {% endif %}
+                                                             {% if layer['coulis'] %} {{ layer['coulis_name'] }} {% endif %}
+                                                             {% set layer_count =  layer_count + 1 %}
+                                                         {% endfor %})
+                                                         <br/>
+                                                         {% if moule['identique'] %}
+                                                            {% set moule_count = moule_count + 1 %}
+                                                         {% endif %}
+                                                         {% for identique in moule['identique'] %}
+
+                                                             moule {{ moule_count }} (<strong>Type:</strong> {{ identique['moule_choix_identique_name'] }}, <strong>Qte:</strong> {{ identique['qte_moule_identique'] }}
+                                                              , {% set layer_count = 1 %}
+                                                             {% for layer in moule.layer  %}
+                                                                 <strong> Layer {{ layer_count }}: </strong> {{ layer['gout_creme_name'] }}
+                                                                 {% if layer['imbibage'] %} {{ layer['imbibage_name'] }} {% endif %}
+                                                                 {% if layer['coulis'] %} {{ layer['coulis_name'] }} {% endif %}
+                                                                 {% set layer_count =  layer_count + 1 %}
+                                                             {% endfor %})
+                                                             <br/>
+                                                             {% set moule_count = moule_count + 1 %}
+                                                         {% endfor %}
+                                                         {% set moule_count =  moule_count + 1 %}
+                                                     {% endfor %}
+                                                     {% if produit.impression|int and not produit.pate|int %} Impression <br/> {% endif %}
+                                                     {% if produit.pate|int and not produit.impression|int %} Pate <br/> {% endif %}
+                                                     {% if produit.pate|int and produit.impression|int %} Impression & Pate <br/> {% endif %}
+                                                     <strong>Observation:</strong>{{ produit.observation }}
+                                                 </td>
+                                                 <td class="text-center">[{{ list_part[produit.nbre_part] }}] </td>
+                                                 <td class="text-center">{% if produit.price %}{{ produit.price|format_price() }} FCFA {% else %} Prix non definit {% endif %}</td>
+                                             <td></td>
+
+                                             </tr>
+                                         {% endif %}
+                                         {% if produit.type_produit == '2' %}
+                                             <tr>
+                                                 <td>{{ produit.type_produit_id}} -  <strong>{{ produit.type_gateau_name }} {{ produit.ruban_name }}</strong><br/>
+                                                     {% if produit.emballage|int %} Emballage, <br/>{% else %} Sans Emballage, <br/>{% endif %}
+                                                     {% if produit.impression|int and not produit.pate|int %} Impression <br/>{% endif %}
+                                                     {% if produit.pate|int and not produit.impression|int %} Pate <br/>{% endif %}
+                                                     {% if produit.pate|int and produit.impression|int %} Impression & Pate <br/>{% endif %}
+
+                                                     <strong>Observation:</strong>{{ produit.observation }}
+                                                 </td>
+                                                 <td class="text-center">{{ produit.nbre_part }} </td>
+                                                 <td class="text-center">{{ produit.price|format_price() }} FCFA </td>
+                                             <td></td>
+                                             </tr>
+                                         {% endif %}
+                                         {% if produit.type_produit == '3' %}
+                                             <tr>
+                                                 <td>{{ produit.type_produit_id}} -  <strong>{{ produit.type_gateau_name }}</strong><br/>
+
+                                                    <strong>Gout de creme :</strong> {{ produit.gout_creme_name }},
+                                                    <strong>Fourrage :</strong> {{ produit.fourrage_name }}
+                                                    {% if produit.coulis|int %}
+                                                         <strong>Coulis :</strong> {{ produit.coulis_name }}
+                                                    {% endif %}
+                                                    {% if produit.imbibage|int %}
+                                                         <strong>Imbibage :</strong> {{ produit.imbibage_name }}
+                                                    {% endif %}
+                                                    {% if produit.topping|int %}
+                                                         <strong>Topping :</strong> {{ produit.topping_name }}
+                                                    {% endif %}
+                                                     {% if produit.couleur_cup|int %}
+                                                         <strong>Couleur Cup :</strong> {{ produit.couleur_cup_name }}
+                                                    {% endif %}
+                                                     {% if produit.impression|int and not produit.pate|int %} Impression <br/>{% endif %}
+                                                     {% if produit.pate|int and not produit.impression|int %} Pate <br/>{% endif %}
+                                                     {% if produit.pate|int and produit.impression|int %} Impression & Pate <br/>{% endif %}
+
+                                                     <strong>Observation:</strong>{{ produit.observation }}
+                                                 </td>
+                                                 <td class="text-center">{{ produit.nbre_part }} </td>
+                                                 <td class="text-center">{{ produit.price|format_price() }} FCFA </td>
+                                             <td></td>
+                                             </tr>
+                                         {% endif %}
+                                     {% else %}
+                                     <tr>
+                                         <td colspan="4">
+                                             <h3 class="text-center">Aucun produit</h3>
+                                         </td>
+                                     </tr>
+                                    {% endfor %}
+
+                                     </tbody>
+                                     <tfooter>
+                                          <tr>
+                                              <td></td>
+                                             <td  class="text-right"><strong>Montant Total</strong></td>
+                                             <td class="text-center"> <strong>{{ total|format_price() }} FCFA</strong> </td>
+                                              <td></td>
+                                         </tr>
+                                         <tr>
+                                             <td></td>
+                                             <td class="text-right"><strong>Accompte</strong></td>
+                                             <td class="text-center"> <strong>{{ session.get('client_commande').accompte|format_price() }} FCFA</strong>  </td>
+                                             <td><a href="{{ url_for('commande.accompte_commande') }}" class="btn btn-primary btn-xs pull-right" data-toggle="modal" data-target="#myModal" data-backdrop="static">+</a></td>
+                                         </tr>
+                                         <tr>
+                                             <td></td>
+                                             <td class="text-right"><strong>Reste à payer</strong></td>
+                                             <td class="text-center"> <strong>{{ total_accompte|format_price() }} FCFA</strong> </td>
+                                             <td></td>
+                                         </tr>
+                                     </tfooter>
+
+                    </table>
+
+                    <hr/>
+                    <a href="{{ url_for('commande.check_pin', url='create_commande') }}" id="create_commande" data-url="{{ url_for('commande.commande_terminer') }}" class="btn btn-success pull-right" style="margin: 10px;" data-toggle="modal" data-target="#myModal" data-backdrop="static">Terminer</a>
+                    <a href="{{ url_for('commande.creer') }}" class="btn btn-default pull-right" style="margin: 10px;">Retour</a>
+                    <a href="{{ url_for('commande.annuler') }}" class="btn btn-danger pull-right" style="margin: 10px;">Annuler</a>
+                </div>
+            </div>
+
+        </div>
+</div>
+
+{% endblock %}

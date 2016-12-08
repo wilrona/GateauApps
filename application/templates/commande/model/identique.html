@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="col-lg-5">
+        <div class="form-group">
+          <label for="" class="col-sm-4" style="padding-top:3px; "> Choix :</label>
+          <div class="col-lg-8" style="padding-top:3px; ">
+                <select class="form-control" name="moule_choix_identique" required>
+                    <option value="">Choix de moule</option>
+                    {% for moule in moule_list %}
+                       <option value="{{ moule.key.id() }}">{{ moule.name }}</option>
+                    {% endfor %}
+                </select>
+          </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="form-group">
+          <label for="" class="col-sm-4" style="padding-top:3px; ">Quantite :</label>
+          <div class="col-lg-8" style="padding-top:3px; ">
+              <input class="form-control input-sm" type="number" name="qte_moule_identique" value="" required="required" min="1"/>
+          </div>
+        </div>
+    </div>
+    <div class="col-lg-1">
+        <a href="#" class="btn btn-link remove_identique"><i class="glyphicon glyphicon-minus"></i></a>
+    </div>
+</div>

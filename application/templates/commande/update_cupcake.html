@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+
+{% block layout_content %}
+
+<div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Fiche Technique - Cupcake </h1>
+            </div>
+
+            <div class="col-lg-10 col-lg-offset-1">
+
+                <form class="form-horizontal" id="FormulaireToSend" method="POST" action="{{ url_for('commande.updateCupcake', id_commande=id_commande, gateau_id=gateau_id) }}">
+                     <input type="hidden" name="user" id="input_user"/>
+                     <div class="page-header">
+                                 {% if not current_gateau %}
+                                          <a href="" class="btn btn-primary pull-right btn-sm add_layer">Ajouter une caracteristique</a>
+                                 {% endif %}
+                                      <h4>Les caracteristiques </h4>
+                                      <input type="hidden" name="nbre_layer" value="1" class="nbre_layer"/>
+                                    </div>
+                                            <div class="panel panel-default layer">
+                                                <div class="panel-heading">
+                                                    <strong>Caracteristique</strong>
+                                                </div>
+                                                <div class="panel-body">
+                                                    <div class="form-group">
+                                                          <label for="" class="col-sm-4" style="padding-top:3px; ">Type de cupcake :</label>
+                                                          <div class="col-lg-8" style="padding-top:3px; ">
+                                                                <select class="form-control" name="typegateaux" required >
+                                                                    <option value="">Selectionnez un type de cupcake</option>
+                                                                    {% for typegateaux in typegateau_list %}
+                                                                       <option value="{{ typegateaux.key.id() }}" {% if gateau_id and current_gateau.typeGateau_id.get().key.id()|int == typegateaux.key.id()  %} selected {% endif %}>{{ typegateaux.name }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                          </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                      <label for="" class="col-sm-4" style="padding-top:3px; ">Quantite :</label>
+                                                      <div class="col-lg-8" style="padding-top:3px; ">
+                                                          <select class="form-control" name="nbre_part" required>
+                                                                {% for n in range(1, 10) %}
+                                                                    <option value="{{ (n*6) }}" {% if gateau_id and current_gateau.nbrPart|int == (n*6) %} selected {% endif %} >{{ (n*6) }}</option>
+                                                                {% endfor %}
+                                                          </select>
+                                                      </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                      <label for="" class="col-sm-4" style="padding-top:3px; ">Fourrage :</label>
+                                                      <div class="col-lg-8" style="padding-top:3px; ">
+                                                            <select class="form-control" name="fourrage" required>
+                                                                <option value="">Choix fourrage</option>
+                                                                <option value="0" {% if not current_gateau.list_composition_unique().fourage_id  %} selected {% endif %}>Aucun</option>
+                                                                {% for fourrage in fourrage_list %}
+                                                                   <option value="{{ fourrage.key.id() }}" {% if gateau_id and current_gateau.list_composition_unique().fourage_id and current_gateau.list_composition_unique().fourage_id.get().key.id()|int == fourrage.key.id()  %} selected {% endif %}>{{ fourrage.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                      </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                      <label for="" class="col-sm-4" style="padding-top:3px; ">Gout creme :</label>
+                                                      <div class="col-lg-8" style="padding-top:3px; ">
+                                                            <select class="form-control" name="gout_creme" required>
+                                                                <option value="">Choix gout creme</option>
+                                                                <option value="0" {% if not current_gateau.list_composition_unique().goutcreme_id  %} selected {% endif %}>Aucun</option>
+                                                                {% for gout_creme in gout_creme_list %}
+                                                                   <option value="{{ gout_creme.key.id() }}" {% if gateau_id and current_gateau.list_composition_unique().goutcreme_id and current_gateau.list_composition_unique().goutcreme_id.get().key.id()|int == gout_creme.key.id()  %} selected {% endif %}>{{ gout_creme.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                      </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                      <label for="" class="col-sm-4" style="padding-top:3px; ">Imbibage :</label>
+                                                      <div class="col-lg-8" style="padding-top:3px; ">
+                                                            <select class="form-control" name="imbibage" required>
+                                                                <option value="">Choix imbibage</option>
+                                                                <option value="0" {% if not current_gateau.list_composition_unique().imbibage_id  %} selected {% endif %}>Aucun</option>
+                                                                {% for imbibage in imbibage_list %}
+                                                                   <option value="{{ imbibage.key.id() }}" {% if gateau_id and current_gateau.list_composition_unique().imbibage_id and current_gateau.list_composition_unique().imbibage_id.get().key.id()|int == imbibage.key.id()  %} selected {% endif %}>{{ imbibage.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                      </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                      <label for="" class="col-sm-4" style="padding-top:3px; ">Coulis :</label>
+                                                      <div class="col-lg-8" style="padding-top:3px; ">
+                                                            <select class="form-control" name="coulis" required>
+                                                                <option value="">Choix coulis</option>
+                                                                <option value="0" {% if not current_gateau.list_composition_unique().coulis_id  %} selected {% endif %}>Aucun</option>
+                                                                {% for coulis in coulis_list %}
+                                                                   <option value="{{ coulis.key.id() }}" {% if gateau_id and current_gateau.list_composition_unique().coulis_id and current_gateau.list_composition_unique().coulis_id.get().key.id()|int == coulis.key.id()  %} selected {% endif %}>{{ coulis.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                      </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                      <label for="" class="col-sm-4" style="padding-top:3px; ">Couleur cup :</label>
+                                                      <div class="col-lg-8" style="padding-top:3px; ">
+                                                            <select class="form-control" name="couleur_cup" required>
+                                                                <option value="">Choix couleur cup</option>
+                                                                <option value="0" {% if not current_gateau.list_composition_unique().couleur_cup_id  %} selected {% endif %}>Aucun</option>
+                                                                {% for couleur in couleur_list %}
+                                                                   <option value="{{ couleur.key.id() }}" {% if gateau_id and current_gateau.list_composition_unique().couleur_cup_id and current_gateau.list_composition_unique().couleur_cup_id.get().key.id()|int == couleur.key.id()  %} selected {% endif %}>{{ couleur.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                      </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                      <label for="" class="col-sm-4" style="padding-top:3px; ">Topping :</label>
+                                                      <div class="col-lg-8" style="padding-top:3px; ">
+                                                            <select class="form-control" name="topping" required>
+                                                                <option value="">Choix topping</option>
+                                                                <option value="0" {% if not current_gateau.list_composition_unique().topping_id  %} selected {% endif %}>Aucun</option>
+                                                                {% for topping in topping_list %}
+                                                                   <option value="{{ topping.key.id() }}" {% if gateau_id and current_gateau.list_composition_unique().topping_id and current_gateau.list_composition_unique().topping_id.get().key.id()|int == topping.key.id()  %} selected {% endif %}>{{ topping.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                      </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="" class="col-sm-4" style="padding-top:3px;">Decoration : </label>
+                                                        <div class="col-sm-8">
+                                                            <div class="checkbox">
+                                                                <label class="checkbox-inline">
+                                                                    <input type="checkbox" name="impression" {% if current_gateau.impression %}checked {% endif %} id="impression"/>Impression Alimentaire
+                                                                    <input type="hidden" name="input_impression" value="{% if current_gateau.impression %}1 {% else %}0{% endif %}"/>
+                                                                </label>
+                                                                <label class="checkbox-inline">
+                                                                    <input type="checkbox" name="pate" {% if current_gateau.pate %}checked {% endif %} id="pate"/>Pate a sucre
+                                                                    <input type="hidden" name="input_pate" value="{% if current_gateau.impression %}1 {% else %}0{% endif %}"/>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                          <label for="" class="col-sm-4" style="padding-top:3px; ">Observation :</label>
+                                                          <div class="col-lg-8" style="padding-top:3px; ">
+                                                              <textarea name="observation" id="" cols="60" rows="10" class="form-control" style="resize:none;">{% if gateau_id %} {{ current_gateau.observation }} {% endif %}</textarea>
+                                                          </div>
+                                                    </div>
+                                                     <div class="form-group">
+                                                          <label for="" class="col-sm-4" style="padding-top:3px; ">Prix de vente :</label>
+                                                          <div class="col-lg-8" style="padding-top:3px; ">
+                                                              <input type="number" name="prix" class="form-control" value="{% if gateau_id %}{{ current_gateau.prix }}{% endif %}" required/>
+                                                          </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                    <hr/>
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-lg-8">
+                          <a class="btn btn-danger" href="{{ url_for('commande.facture', id_commande=id_commande) }}">Annuler</a>
+                          <a class="btn btn-success" id="submit" data-toggle="modal" data-target="#myModal" data-backdrop="static" href="{{ url_for('commande.check_pin') }}">Valider</a>
+
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+</div>
+
+{% endblock %}
+{% block footer_script %}
+    <script>
+        $(document).ready(function() {
+
+            $('body').on('click', '#impression', function(){
+               current = $(this)
+               parent = $(this).parent().find('input[name=input_impression]');
+               if($(current).is(":checked")){
+                   parent.val('1')
+               }else{
+                   parent.val('0')
+               }
+            });
+
+            $('body').on('click', '#pate', function(){
+               current = $(this)
+               parent = $(this).parent().find('input[name=input_pate]');
+               if($(current).is(":checked")){
+                   parent.val('1')
+               }else{
+                   parent.val('0')
+               }
+            });
+
+
+            $('body').on('click', '.add_layer', function (e) {
+
+                e.preventDefault();
+                current_moule = $(this).parent().parent();
+
+                nbrlayer = current_moule.find('.nbre_layer');
+
+                nbrlayer = parseInt(nbrlayer.val());
+                nbrlayer++;
+                last_layer = current_moule.find('.layer:last');
+
+                $.ajax({
+                    url:'{{ url_for('commande.layer') }}?nbre='+nbrlayer+'&caract=1',
+                    type: 'GET',
+                    success: function(data) {
+
+                        last_layer.after(data).fadeIn('slow');
+                        current_moule.find('.nbre_layer').val(nbrlayer);
+
+                    }
+                });
+
+
+            });
+
+            $('body').on('click', '.close', function (e) {
+                e.preventDefault();
+                $current_moule = $(this).parent().parent();
+                if($current_moule.hasClass('layer')){
+                    $nbr_layer = $current_moule.parent().find('.nbre_layer');
+                    $nbr_layer = parseInt($nbr_layer.val());
+                    $nbr_layer = $nbr_layer - 1;
+                    $current_moule.parent().find('.nbre_layer').val($nbr_layer);
+
+                    $current_moule.parent().find('.layer:last .panel-heading strong').text('Layer '+$nbr_layer)
+
+                }
+                $current_moule.hide('slow').remove();
+            });
+         });
+{#        window.onbeforeunload = function() {#}
+{#          return "Data will be lost if you leave the page, are you sure?";#}
+{#        };#}
+    </script>
+
+{% endblock %}

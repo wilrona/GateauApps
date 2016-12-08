@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %} Parametrage | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_gateau.html' %}      {% endblock %}
+
+{% block layout_content %}
+
+
+    <div class="col-lg-12">
+        <div class="page-header">
+          <h1>Liste des parametres des prix de gateaux </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('gateau.param_price_edit') }}" class="btn btn-primary {% if not current_user.has_roles([('super_admin', 'prix_gateaux')], ['edit']) %} disabled {% endif %}" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+         <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="30%">Categorie</th>
+                <th width="20%">Intervalle</th>
+                <th width="20%">Prix</th>
+                <th width="15%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                  <tr>
+                    <td>
+                        {{ data.categorie_id.get().name }}
+                    </td>
+                    <td>
+                        {{ list_part[data.interval] }}
+                    </td>
+                    <td>{% if data.prix %} {{ data.prix|format_price() }} {% else %} 0 {% endif %} FCFA</td>
+                    <td>
+                        {% if current_user.has_roles([('super_admin', 'prix_gateaux')], ['edit']) and data.type_produit != 1 %}
+                            <a href="{{ url_for('gateau.param_price_edit', gateau_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i></a>
+                        {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+
+ {% endblock %}

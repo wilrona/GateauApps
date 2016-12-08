@@ -1,0 +1,119 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Creation/Modification</h4>
+</div>
+
+<form class="form-horizontal" role="form" id="formulaire">
+
+    {{ form.hidden_tag() }}
+    <div class="modal-body">
+      <div class="row">
+          <div class="{% if form.client.data %}col-lg-8 {% else %} col-lg-12 {% endif %}">
+              <h4>Information</h4>
+              <hr/>
+
+    {% if not form.client.data %}
+      <div class="form-group">
+        {{ form.login.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.login(class_='form-control') }}
+        {% for message in form.login.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+      <div class="form-group">
+        {{ form.name.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.name(class_='form-control') }}
+        {% for message in form.name.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.phone.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.phone(class_='form-control') }}
+        {% for message in form.phone.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.email.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.email(class_='form-control') }}
+        {% for message in form.email.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    {% if not form.client.data %}
+      <div class="form-group">
+        {{ form.profil.label(class_='col-sm-3 control-label') }}
+        <div class="col-sm-9">
+        {{ form.profil(class_='form-control') }}
+        {% for message in form.profil.errors %}
+            <div class="alert alert-danger form-validator">{{ message }}</div>
+        {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+    </div>
+      {% if form.client.data %}
+          <div class="col-lg-4">
+               {% if client_id %}
+
+                <h4>Statistique</h4>
+                <hr/>
+                   <div class="form-horizontal">
+                      <div class="form-group">
+                        <label class="col-sm-6 control-label">Derniere Dépense :</label>
+                        <div class="col-sm-6">
+                          <p class="form-control-static">0 F</p>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="col-sm-6 control-label">Total Dépense :</label>
+                        <div class="col-sm-6">
+                          <p class="form-control-static">0 F</p>
+                        </div>
+                      </div>
+                   </div>
+
+                {% else %}
+
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <p>Creer votre client et visualiser les statistiques</p>
+                        </div>
+                    </div>
+
+                {% endif %}
+          </div>
+      {% endif %}
+      </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+<script>
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{% if not form.client.data %}{{ url_for('user_param.edit', user_id=user_id) }} {% else %} {{ url_for('clients.edit', client_id=client_id) }} {% endif %}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{% if not form.client.data %}{{ url_for('user_param.index') }}{% else %}{{ url_for('clients.index') }}{% endif %}").delay();
+    {% endif %}
+</script>

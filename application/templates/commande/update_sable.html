@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+
+{% block layout_content %}
+
+<div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Fiche Technique - Sable </h1>
+            </div>
+
+            <div class="col-lg-10 col-lg-offset-1">
+                 <form class="form-horizontal" id="FormulaireToSend" method="post" action="{{ url_for('commande.updateSable', id_commande=id_commande, gateau_id=gateau_id) }}">
+                    <input type="hidden" name="user" id="input_user"/>
+                    <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Quantite de sable:</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                                <select class="form-control" name="qte" required>
+                                    {% for n in range(1, 10) %}
+                                        <option value="{{ (n*6) }}" {% if gateau_id and current_gateau.qte == (n*6) %} selected {% endif %} >{{ (n*6) }}</option>
+                                    {% endfor %}
+                                </select>
+                          </div>
+                    </div>
+                    <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Forme du sable :</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                                <select class="form-control" name="forme" required>
+                                    <option value="">Forme de sable</option>
+                                    {% for form in form_list %}
+                                  <option value="{{ form.key.id() }}" {% if gateau_id and current_gateau.typeGateau_id.get().key.id()|int == form.key.id() %} selected {% endif %}>{{ form.name }}</option>
+                                    {% endfor %}
+                                </select>
+                          </div>
+                    </div>
+                    <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Couleur de ruban :</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                                <select class="form-control" name="ruban" required>
+                                    <option value="">Couleur de ruban </option>
+                                    {% for ruban in couleur_ruban %}
+                                  <option value="{{ ruban.key.id() }}" {% if gateau_id and current_gateau.couleurRuban_id.get().key.id()|int == ruban.key.id() %} selected {% endif %}>{{ ruban.name }}</option>
+                                    {% endfor %}
+                                </select>
+                          </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-4" style="padding-top:3px;">Emballage : </label>
+                        <div class="col-sm-8">
+                                <div class="radio">
+                                  <label class="radio-inline">
+                                    <input type="radio" name="emballage" value="0" {% if not current_gateau.emballage %}checked {% endif %} {% if not current_gateau %} checked {% endif %}>
+                                    Non
+                                  </label>
+                                    <label class="radio-inline">
+                                    <input type="radio" name="emballage" value="1" {% if current_gateau.emballage %}checked {% endif %}>
+                                    Oui
+                                  </label>
+                                </div>
+                        </div>
+                      </div>
+                     <div class="form-group">
+                        <label for="" class="col-sm-4" style="padding-top:3px;">Decoration : </label>
+                        <div class="col-sm-8">
+                            <div class="checkbox">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="impression" {% if current_gateau.impression %}checked {% endif %} />Impression Alimentaire
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" name="pate" {% if current_gateau.pate %}checked {% endif %} />Pate a sucre
+                                </label>
+                            </div>
+                        </div>
+                      </div>
+                    <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Observation :</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                              <textarea name="observation" id="" cols="60" rows="10" class="form-control" style="resize:none;">{% if gateau_id %}{{ current_gateau.observation }}{% endif %}</textarea>
+                          </div>
+                    </div>
+                    <div class="form-group">
+                          <label for="" class="col-sm-4" style="padding-top:3px; ">Prix de vente :</label>
+                          <div class="col-lg-8" style="padding-top:3px; ">
+                              <input type="number" name="prix" class="form-control" value="{% if gateau_id %}{{ current_gateau.prix }}{% endif %}" required/>
+                          </div>
+                    </div>
+                    <hr/>
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-lg-8">
+                          <a class="btn btn-danger" href="{{ url_for('commande.facture', id_commande=id_commande) }}">Annuler</a>
+                          <a class="btn btn-success" id="submit" data-toggle="modal" data-target="#myModal" data-backdrop="static" href="{{ url_for('commande.check_pin') }}">Valider</a>
+
+                        </div>
+                    </div>
+                 </form>
+            </div>
+        </div>
+</div>
+
+{% endblock %}

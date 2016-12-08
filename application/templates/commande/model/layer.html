@@ -1,0 +1,122 @@
+<div class="panel panel-default layer">
+    <div class="panel-heading">
+        <button type="button" class="close" aria-label="Close" class="close_layer"><span aria-hidden="true">&times;</span></button>
+        <strong>{% if request.args.get('caract') %} Caracteristique {% else %} Layer {% endif %} {{ request.args.get('nbre')}}</strong>
+    </div>
+    <div class="panel-body">
+        {% if request.args.get('caract') %}
+            <div class="form-group">
+                  <label for="" class="col-sm-4" style="padding-top:3px; ">Type de cupcake :</label>
+                  <div class="col-lg-8" style="padding-top:3px; ">
+                        <select class="form-control" name="typegateaux" required >
+                            <option value="">Selectionnez un type de cupcake</option>
+                            {% for typegateaux in typegateau_list %}
+                               <option value="{{ typegateaux.key.id() }}" >{{ typegateaux.name }}</option>
+                            {% endfor %}
+                        </select>
+                  </div>
+            </div>
+            <div class="form-group">
+              <label for="" class="col-sm-4" style="padding-top:3px; ">Quantite :</label>
+              <div class="col-lg-8" style="padding-top:3px; ">
+                  <select class="form-control" name="nbre_part" required>
+                        {% for n in range(1, 10) %}
+                            <option value="{{ (n*6) }}" >{{ (n*6) }}</option>
+                        {% endfor %}
+                  </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="" class="col-sm-4" style="padding-top:3px; ">Fourrage :</label>
+              <div class="col-lg-8" style="padding-top:3px; ">
+                    <select class="form-control" name="fourrage" required>
+                        <option value="">Choix fourrage</option>
+                        {% for fourrage in fourrage_list %}
+                           <option value="{{ fourrage.key.id() }}">{{ fourrage.name }}</option>
+                        {% endfor %}
+                    </select>
+              </div>
+            </div>
+        {% endif %}
+        <div class="form-group">
+          <label for="" class="col-sm-4" style="padding-top:3px; ">Gout creme :</label>
+          <div class="col-lg-8" style="padding-top:3px; ">
+                <select class="form-control" name="gout_creme" required>
+                    <option value="">Choix gout creme</option>
+                    {% for gout_creme in gout_creme_list %}
+                       <option value="{{ gout_creme.key.id() }}">{{ gout_creme.name }}</option>
+                    {% endfor %}
+                </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="" class="col-sm-4" style="padding-top:3px; ">Imbibage :</label>
+          <div class="col-lg-8" style="padding-top:3px; ">
+                <select class="form-control" name="imbibage" required>
+                    <option value="0">Aucun</option>
+                    {% for imbibage in imbibage_list %}
+                       <option value="{{ imbibage.key.id() }}" >{{ imbibage.name }}</option>
+                    {% endfor %}
+                </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="" class="col-sm-4" style="padding-top:3px; ">Coulis :</label>
+          <div class="col-lg-8" style="padding-top:3px; ">
+                <select class="form-control" name="coulis" required>
+                    <option value="0">Aucun</option>
+                    {% for coulis in coulis_list %}
+                       <option value="{{ coulis.key.id() }}">{{ coulis.name }}</option>
+                    {% endfor %}
+                </select>
+          </div>
+        </div>
+
+        {% if request.args.get('caract') %}
+            <div class="form-group">
+              <label for="" class="col-sm-4" style="padding-top:3px; ">Couleur cup :</label>
+              <div class="col-lg-8" style="padding-top:3px; ">
+                    <select class="form-control" name="couleur_cup" required>
+                        <option value="0">Aucun</option>
+                        {% for couleur in couleur_list %}
+                           <option value="{{ couleur.key.id() }}">{{ couleur.name }}</option>
+                        {% endfor %}
+                    </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="" class="col-sm-4" style="padding-top:3px; ">Topping :</label>
+              <div class="col-lg-8" style="padding-top:3px; ">
+                    <select class="form-control" name="topping" required>
+                        <option value="0">Aucun</option>
+                        {% for topping in topping_list %}
+                           <option value="{{ topping.key.id() }}">{{ topping.name }}</option>
+                        {% endfor %}
+                    </select>
+              </div>
+            </div>
+            <div class="form-group">
+                <label for="" class="col-sm-4" style="padding-top:3px;">Decoration : </label>
+                <div class="col-sm-8">
+                    <div class="checkbox">
+                        <label class="checkbox-inline" id="impression-checkbox">
+                            <input type="checkbox" name="impression" id="impression"/>Impression Alimentaire
+                            <input type="hidden" name="input_impression" value="0"/>
+                        </label>
+                        <label class="checkbox-inline" id="pate-checkbox">
+                            <input type="checkbox" name="pate" id="pate"/>Pate a sucre
+                            <input type="hidden" name="input_pate" value="0"/>
+                        </label>
+                    </div>
+                </div>
+             </div>
+            <div class="form-group">
+                  <label for="" class="col-sm-4" style="padding-top:3px; ">Observation :</label>
+                  <div class="col-lg-8" style="padding-top:3px; ">
+                      <textarea name="observation" id="" cols="60" rows="10" class="form-control" style="resize:none;"></textarea>
+                  </div>
+            </div>
+
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,49 @@
+<nav class="navbar nav-menu navbar-masthead navbar-default navbar-fixed-top" style="background-color: white;">
+
+         <div class="container">
+          <div class="navbar-header">
+            <span class="navbar-brand">
+                <!--<img alt="Brand" src="img/logoBarre.png">-->
+                <img src="/static/img/Logo-CC-2016.png" alt="" width="40" style="float: left; margin-top: -11px;"/>
+                <a class="navbar-link" style="text-decoration:none; color:#a94442; font-weight:bold; float: right; margin-left: 10px;">Creative Cake</a>
+            </span>
+          </div>
+
+
+             <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> {{ current_user.name }} <span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="{{ url_for('user.logout') }}">D&eacute;connexion</a></li>
+                  </ul>
+                </li>
+              </ul>
+             {% if current_user.has_roles([('super_admin', 'commande')], ['edit']) %}
+                <a class="btn btn-danger navbar-btn navbar-right btn-sm" style="margin: 10px;" href="{{ url_for('commande.infosClient') }}">Creer une commande</a>
+             {% endif %}
+             <ul class="nav navbar-nav navbar-right">
+
+                    {% if current_user.has_roles([('super_admin', 'dashboard')]) %}
+                    <li {% if menu == 'dashboard' %} class="active" {% endif %}><a href="{{ url_for('dashboard.index') }}">Tableau de Bord</a></li>
+                    {% endif %}
+
+                    {% if current_user.has_roles([('super_admin', 'client')]) %}
+                    <li {% if menu == 'client' %} class="active" {% endif %}><a href="{{ url_for('clients.index') }}">Clients</a></li>
+                    {% endif %}
+
+                    {% if current_user.has_roles([('super_admin', 'gateau')]) %}
+                    <li {% if menu == 'gateau' %} class="active" {% endif %} ><a href="{{ url_for('gateau.index') }}">Produits</a></li>
+                    {% endif %}
+
+                    {% if current_user.has_roles([('super_admin', 'commande')]) or current_user.has_roles(['livraison_prod']) or current_user.has_roles(['planning_prod']) %}
+                    <li {% if menu == 'commande' %} class="active" {% endif %} ><a href="{{ url_for('commande.index') }}">Commandes</a></li>
+                    {% endif %}
+
+                    {% if current_user.has_roles([('super_admin', 'user', 'evenement', 'role', 'categorie', 'couleur_ruban', 'moules', 'coulis', 'imbibages', 'gouts_cremes', 'fourrages', 'couleur_cup', 'topping')]) %}
+
+                    <li {% if menu == 'parametre' %} class="active" {% endif %}><a href="{{ url_for('parametre.index') }}">Parametres</a></li>
+                    {% endif %}
+                </ul>
+
+        </div>
+    </nav>

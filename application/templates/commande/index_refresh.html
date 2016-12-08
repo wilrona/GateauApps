@@ -1,0 +1,144 @@
+{% if not printer %}
+                <div id="load" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3); display: none;    color: #fff;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20;">Chargement</div>
+             <table class="table table-condensed">
+                <thead>
+                <tr>
+                    <tr>
+                    <th width="15%">Reference</th>
+                    <th width="15%">Client</th>
+                    <th width="20%">Theme</th>
+                    <th width="15%">Date cmd</th>
+                    <th width="15%">Date liv.</th>
+                    <th width="15%">Heure liv.</th>
+                    <th width="10%">Action</th>
+                </tr>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for data in datas %}
+                      <tr {% if data.livre %} class="info" {% endif %}>
+                        <td>{{ data.ref }}</td>
+                        <td>{{ data.user.get().name }}</td>
+                        <td>{{ data.theme }}</td>
+                        <td>{{ data.dateCmd|format_date('%d/%m/%Y') }}</td>
+                        <td>
+                            {{ data.dateLiv|format_date('%d/%m/%Y') }}
+                        </td>
+                        <td>
+                            {{ data.timeLiv|format_date('%H:%M') }}
+                        </td>
+
+                        <td>
+{#                            {% if  current_user.has_roles([('super_admin', 'facture_commande')]) %}#}
+                            <a href="{{ url_for('commande.facture', id_commande=data.key.id()) }}" class="btn btn-link btn-xs" target="_blank">Facture</a>
+{#                            {% endif %}#}
+                        </td>
+                      </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">
+                                <h4 class="text-center">Aucune information</h4>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+{% else %}
+ <html lang='en'>
+ <head>
+ 	<meta charset='utf-8'>
+ 	<title>{{ title_page }}</title>
+
+     <script type="text/javascript" src="/static/js/pdfmake.js"></script>
+     <script type="text/javascript" src="/static/js/vfs_fonts.js"></script>
+     <script>
+
+             var docDefinition = {
+              pagesize: 'A4',
+              pageOrientation: 'landscape',
+              pageMargins:[30,50,30,30],
+              header: [
+                  {
+                      text: 'Creative Cake',
+                      alignment: 'center',
+                      margin:[0, 25, 0, 0]
+                  }
+              ],
+              footer:function(currentPage, pageCount) {
+                  return {
+                      text: currentPage.toString() + ' sur ' + pageCount,
+                      alignment: 'center'
+                  }
+              },
+              content: [
+                  {
+                      text: '{{ title_page }}',
+                      alignment: 'center',
+                      fontSize: 20,
+                      margin:[0, 20, 0, 20]
+                  },
+                  {
+                      text: 'Periode du {{ date_start|format_date('%d/%m/%Y') }} au {{ date_end|format_date('%d/%m/%Y') }}',
+                      alignment: 'center',
+                      margin:[0, 10, 0, 10]
+                  },
+                  {
+                      table: {
+                            headerRows: 1,
+                            widths: ['*','*','*','*','*','*'],
+                            body: [
+                                    [{ text: 'Reference', bold: true, alignment:'left' }, { text: 'Client', bold: true }, { text: 'Theme', bold: true }, { text: 'Date cmd', bold: true }, { text: 'Date Liv.', bold: true}, { text: 'Heure Liv.', bold: true}],
+                                    {% for data in datas %}
+                                       [{text:'{{  data.ref }}', alignment:'left'},'{{ data.user.get().name }}', '{{ data.theme }}','{{  data.dateCmd|format_date('%d/%m/%Y') }}', '{{ data.dateLiv|format_date('%d/%m/%Y') }}', '{{ data.timeLiv|format_date('%H:%M') }}'],
+                                    {% endfor %}
+
+
+                            ]
+                      },
+                      layout: {
+														hLineWidth: function(i, node) {
+																return (i === 0 || i === node.table.body.length) ? 2 : 1;
+														},
+														vLineWidth: function(i, node) {
+																return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+														},
+														hLineColor: function(i, node) {
+																return (i === 0 || i === node.table.body.length) ? 'black' : 'gray';
+														},
+														vLineColor: function(i, node) {
+																return (i === 0 || i === node.table.widths.length) ? 'black' : 'gray';
+														}
+														// paddingLeft: function(i, node) { return 4; },
+														// paddingRight: function(i, node) { return 4; },
+														// paddingTop: function(i, node) { return 2; },
+														// paddingBottom: function(i, node) { return 2; }
+						}
+                  }
+              ],
+              defaultStyle: {
+                alignment: 'center'
+              }
+          };
+          pdfMake.createPdf(docDefinition).open();
+
+    </script>
+ </head>
+ <body>
+
+</body>
+</html>
+
+
+{% endif %}
+

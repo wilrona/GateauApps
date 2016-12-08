@@ -1,0 +1,484 @@
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+
+{% block layout_content %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Planning de production </h1>
+            </div>
+            <nav class="navbar navbar-toolbar" role="navigation">
+              <div class="container-fluid">
+                <div class="btn-toolbar" role="toolbar">
+                <div class="btn-group">
+                      <h3 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ start|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ end|format_date('%d/%m/%Y') }}"/> </h3>
+                  </div>
+                  <div class="btn-group pull-right">
+                          <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              Exporter
+                              <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('planning.index_refresh', print='1', date_start=start|format_date('%d/%m/%Y'), date_end=end|format_date('%d/%m/%Y')) }}" target="_blank" id="print_pdf">sous PDF</a></li>
+                          </ul>
+                      </div>
+
+                </div>
+              </div>
+            </nav>
+            <div id="table" style="    position: relative; min-height: 345px;">
+                <div id="load" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3); display: none;    color: #fff;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20;">Chargement</div>
+                 <table class="table table-condensed table-bordered">
+                    <thead>
+                    <tr>
+                        <th width="15%">Date</th>
+                        <th width="25%">Moule</th>
+                        <th width="30%">Details</th>
+                        <th width="15%">Theme</th>
+                        <th width="15%">Client</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for data in datas %}
+
+                        <tr>
+                            <td rowspan="{{ (data.moule|length) }}">{{ DayL[data.dateliv.weekday()] }} {{ data.dateliv|format_date('%d') }} {{ Monthly[data.dateliv.month - 1] }}</td>
+                            {% if data.moule[0].gateau.type_produit() == 1 %}
+                                <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Moule</dt>
+                                      <dd>{{ data.moule[0].name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ data.moule[0].qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ data.moule[0].time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                    <br/>
+                                    <strong>Observation</strong> <br/>
+                                    <small style="text-transform: lowercase;">{{ data.moule[0].observation }}</small>
+                                </td>
+                                <td>
+                                    {% for layer in data.moule[0].composite %}
+                                                {% if loop.index > 1 %}
+                                                <hr style="margin-bottom:5px;"/>
+                                                {% endif %}
+                                                {% if layer.name_goutcreme() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Gout de creme</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_goutcreme() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_imbibage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Imbibage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_imbibage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_coulis() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Coulis</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_coulis() }}</div>
+                                                </div>
+                                                {% endif %}
+                                    {% endfor %}
+                                </td>
+
+                            <td>
+                                <a href="{{ url_for('commande.facture', id_commande=data.moule[0].cmd_id) }}" target="_blank">{{ data.moule[0].theme }}</a>
+
+                            </td>
+                            <td>{{ data.moule[0].client.get().name }}</td>
+                            
+                            {% endif %}
+                            {% if data.moule[0].gateau.type_produit() == 2 %}
+                                <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Produit</dt>
+                                      <dd>{{ data.moule[0].name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ data.moule[0].qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ data.moule[0].time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                    <br/>
+                                    <strong>Observation</strong> <br/>
+                                    <small style="text-transform: lowercase;">{{ data.moule[0].observation }}</small>
+                                </td>
+                                <td>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Forme de sable</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ data.moule[0].gateau.name_type_gateau() }}</div>
+                                    </div>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Couleur de ruban</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ data.moule[0].gateau.couleur_ruban() }}</div>
+                                    </div>
+                                </td>
+
+                            <td>
+                                <a href="{{ url_for('commande.facture', id_commande=data.moule[0].cmd_id) }}" target="_blank">{{ data.moule[0].theme }}</a>
+
+                            </td>
+                            <td>{{ data.moule[0].client.get().name }}</td>
+                            
+                            {% endif %}
+
+                            {% if data.moule[0].gateau.type_produit() == 3 %}
+                                 <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Produit</dt>
+                                      <dd>{{ data.moule[0].name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ data.moule[0].qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ data.moule[0].time|format_date('%H:%M') }}</dd>
+                                    </dl>
+
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Type cupcake</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ data.moule[0].gateau.name_type_gateau() }}</div>
+                                    </div>
+                                    <br/>
+                                    <strong>Observation</strong> <br/>
+                                    <small style="text-transform: lowercase;">{{ data.moule[0].observation }}</small>
+                                </td>
+                                <td>
+                                    {% for layer in data.moule[0].composite %}
+                                                {% if loop.index > 1 %}
+                                                <hr style="margin-bottom:5px;"/>
+                                                {% endif %}
+                                                {% if layer.name_fourage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Fourrage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_fourage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_goutcreme() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Gout de creme</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_goutcreme() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_imbibage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Imbibage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_imbibage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_coulis() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Coulis</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_coulis() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_topping() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Topping</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_topping() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_couleur_cup() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Couleur cup</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_couleur_cup() }}</div>
+                                                </div>
+                                                {% endif %}
+                                    {% endfor %}
+                                </td>
+
+                            <td>
+                                <a href="{{ url_for('commande.facture', id_commande=data.moule[0].cmd_id) }}" target="_blank">{{ data.moule[0].theme }}</a>
+
+                            </td>
+                            <td>{{ data.moule[0].client.get().name }}</td>
+                            
+                            {% endif %}
+
+                        </tr>
+                        {% for ml in data.moule %}
+                            {% if loop.index > 1 %}
+                            <tr>
+                            {% if ml.gateau.type_produit() == 1 %}
+                                <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Moule</dt>
+                                      <dd>{{ ml.name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ ml.qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ ml.time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                    <br/>
+                                    <strong>Observation</strong> <br/>
+                                    <small style="text-transform: lowercase;">{{ ml.observation }}</small>
+                                </td>
+                                <td>
+                                    {% for layer in ml.composite %}
+                                                {% if loop.index > 1 %}
+                                                <hr style="margin-bottom:5px;"/>
+                                                {% endif %}
+                                                {% if layer.name_goutcreme() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Gout de creme</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_goutcreme() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_imbibage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Imbibage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_imbibage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_coulis() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Coulis</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_coulis() }}</div>
+                                                </div>
+                                                {% endif %}
+                                    {% endfor %}
+                                </td>
+                               <td><a href="{{ url_for('commande.facture', id_commande=ml.cmd_id) }}" target="_blank">{{ ml.theme }}</a>
+
+                               </td>
+                                <td>{{ ml.client.get().name }}</td>
+                                
+                            {% endif %}
+                            {% if ml.gateau.type_produit() == 2 %}
+                                <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Produit</dt>
+                                      <dd>{{ ml.name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ ml.qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ ml.time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                    <br/>
+                                    <strong>Observation</strong> <br/>
+                                    <small style="text-transform: lowercase;">{{ ml.observation }}</small>
+                                </td>
+                                <td>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Forme de sable</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ ml.gateau.name_type_gateau() }}</div>
+                                    </div>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Couleur de ruban</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ ml.gateau.couleur_ruban() }}</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('commande.facture', id_commande=ml.cmd_id) }}" target="_blank">{{ ml.theme }}</a>
+
+                                </td>
+                                <td>{{ ml.client.get().name }}</td>
+                                
+                            {% endif %}
+                               {% if ml.gateau.type_produit() == 3 %}
+                                 <td>
+                                    <dl class="dl-horizontal">
+                                      <dt style="text-align: left;">Produit</dt>
+                                      <dd>{{ ml.name }}</dd>
+                                      <dt style="text-align: left;">Quantite</dt>
+                                      <dd>{{ ml.qte }}</dd>
+                                      <dt style="text-align: left;">Heure de livraison</dt>
+                                      <dd>{{ ml.time|format_date('%H:%M') }}</dd>
+                                    </dl>
+                                    <div class="col-lg-12" style="padding: 0;">
+                                        <div class="col-lg-6" style="padding: 0;"><strong>Type cupcake</strong></div>
+                                        <div class="col-lg-6" style="padding: 0;">{{ ml.gateau.name_type_gateau() }}</div>
+                                    </div>
+                                    <br/>
+                                    <strong>Observation</strong> <br/>
+                                    <small style="text-transform: lowercase;">{{ ml.observation }}</small>
+                                </td>
+                                <td>
+                                    {% for layer in ml.composite %}
+                                                {% if loop.index > 1 %}
+                                                <hr style="margin-bottom:5px;"/>
+                                                {% endif %}
+                                                {% if layer.name_fourage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Fourrage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_fourage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_goutcreme() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Gout de creme</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_goutcreme() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_imbibage() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Imbibage</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_imbibage() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_coulis() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Coulis</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_coulis() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_topping() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Topping</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_topping() }}</div>
+                                                </div>
+                                                {% endif %}
+                                                {% if layer.name_couleur_cup() %}
+                                                <div class="col-lg-12" style="padding: 0;">
+                                                <div class="col-lg-6" style="padding: 0;"><strong>Couleur cup</strong></div>
+                                                <div class="col-lg-6" style="padding: 0;">{{ layer.name_couleur_cup() }}</div>
+                                                </div>
+                                                {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('commande.facture', id_commande=ml.cmd_id) }}" target="_blank">{{ ml.theme }}</a>
+
+                                </td>
+                                <td>{{ ml.client.get().name }}</td>
+                                
+                            {% endif %}
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+
+                    {% else %}
+
+                         <tr>
+                            <td colspan="6">
+                                <h4 class="text-center">Aucune information</h4>
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+                 </table>
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}
+{% block footer_script %}
+    <script>
+        $('#datepicker_input').datepicker({
+            format: "dd/mm/yyyy",
+            weekStart: 1,
+            todayBtn: "linked",
+            autoclose: true,
+            orientation: "top auto",
+            todayHighlight: true,
+            language: "fr"
+        }).on('changeDate', function(e) {
+            $('#load').show();
+                    // Proceed with your code
+                    var date_start = $('#datepicker_input').val();
+                    var date_end = $('#datepicker2_input').val();
+
+                    var datas = {};
+
+                    var url = '{{ url_for('planning.index_refresh') }}';
+
+                    var date_start_js = date_start;
+                    date_start_js = date_start_js.split('/');
+                    reforme_date = (date_start_js[1]) + '/' + date_start_js[0] + '/' + date_start_js[2];
+                    date_start_js = new Date(reforme_date);
+
+                    var date_end_js = date_end;
+                    date_end_js = date_end_js.split('/');
+                    reforme_date = (date_end_js[1]) + '/' + date_end_js[0] + '/' + date_end_js[2];
+                    date_end_js = new Date(reforme_date);
+
+                    if(date_start_js <= date_end_js){
+                        datas['date_start'] = date_start;
+                        datas['date_end'] = date_end;
+                    }else{
+                        date_end = date_start;
+                        $('#datepicker2_input').val(date_start);
+                        datas['date_start'] = date_start;
+                        datas['date_end'] = date_end;
+                    }
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: datas,
+                        success: function(data) {
+                            $('#table').html(data);
+                            $('#load').hide();
+                        }
+                    });
+        }).inputmask("date", { placeholder:"__/__/____"});
+
+        $('#datepicker2_input').datepicker({
+            format: "dd/mm/yyyy",
+            weekStart: 1,
+            todayBtn: "linked",
+            autoclose: true,
+            orientation: "top auto",
+            todayHighlight: true,
+            language: "fr"
+        }).on('changeDate', function(e) {
+                    $('#load').show();
+                    // Proceed with your code
+                    var date_start = $('#datepicker_input').val();
+                    var date_end = $('#datepicker2_input').val();
+
+                    var datas = {};
+
+                    var url = '{{ url_for('planning.index_refresh') }}';
+
+                    var date_start_js = date_start;
+                    date_start_js = date_start_js.split('/');
+                    reforme_date = (date_start_js[1]) + '/' + date_start_js[0] + '/' + date_start_js[2];
+                    date_start_js = new Date(reforme_date);
+
+                    var date_end_js = date_end;
+                    date_end_js = date_end_js.split('/');
+                    reforme_date = (date_end_js[1]) + '/' + date_end_js[0] + '/' + date_end_js[2];
+                    date_end_js = new Date(reforme_date);
+
+                    if(date_start_js >= date_end_js){
+                        date_start = date_end;
+                        $('#datepicker_input').val(date_end);
+                        datas['date_start'] = date_start;
+                        datas['date_end'] = date_end;
+                    }else{
+                        datas['date_start'] = date_start;
+                        datas['date_end'] = date_end;
+                    }
+                    $('#print_pdf').attr('href', url+'?print=1&date_start='+datas['date_start']+"&date_end="+datas['date_end']);
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: datas,
+                        success: function(data) {
+                            $('#table').html(data);
+                            $('#load').hide();
+                        }
+                    });
+        }).inputmask("date", { placeholder:"__/__/____"})
+
+    </script>
+ {% endblock %}

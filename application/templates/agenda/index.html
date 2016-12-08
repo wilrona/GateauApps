@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %} Parametrage | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_paramatre.html' %}      {% endblock %}
+
+{% block layout_content %}
+<div class="col-lg-12">
+        <div class="page-header">
+          <h1>Configuration de l'agenda </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+            {% if calendar.token and not calendar.agendaID %}
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('agenda.deleteConnexion') }}" class="btn btn-danger">Supprimer la connexion</a>
+              </div>
+            {% endif %}
+              <div class="btn-group pull-right">
+                <a href="{{ url_for('agenda.create') }}" class="btn btn-primary {% if not user or agenda %} disabled {% endif %}">Creer un agenda</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="70%">Nom de l'agenda</th>
+                <th width="30%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if user %}
+                {% for data in datas %}
+                  <tr>
+                    <td>{{ data.name }}</td>
+                    <td>
+                        <a href="{{ url_for('agenda.AddUser') }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static">Ajouter user</a>
+                        <a href="{{ url_for('agenda.delete') }}" class="btn btn-link btn-xs">Supprimer</a>
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="2">
+                           <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                 <tr>
+                    <td colspan="2">
+                        <div class="center-block text-center">
+                            <br/>
+                            <a href="{{ url_for('agenda.oauth2callback') }}" class="btn btn-danger btn-lg">Connecion google agenda</a>
+                            <br/>
+                            <br/>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+
+</div>
+
+
+{% endblock %}

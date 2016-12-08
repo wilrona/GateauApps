@@ -1,0 +1,39 @@
+<div class="modal-header bg-primary">
+    <h4 class="modal-title" id="myModalLabel">Ajoouter/Modifier l'accompte </h4>
+</div>
+<form class="form-horizontal" role="form" id="formulaire">
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="col-sm-4 control-label">Montant de l'accompte :</label>
+        <div class="col-sm-8">
+            <input type="number" class="form-control" name="accompte" value="{{ current_commande.accompte }}"/>
+
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" id="close">Fermer</button>
+        <button type="button" id="submit" class="btn btn-primary">Enregistrer</button>
+    </div>
+</form>
+
+<script>
+
+
+    $('#submit').on('click', function(e){
+        e.preventDefault();
+        $.ajax({
+                url: "{{ url_for('commande.accompte_commande') }}",
+                data: $('#formulaire').serialize(),
+                type: 'POST',
+                success: function(data) {
+                    $('.modal-content').html(data);
+                }
+            });
+    });
+
+    {% if success %}
+        window.location.replace(window.location.origin+"{{ url_for('commande.recap_commande') }}").delay();
+    {% endif %}
+</script>

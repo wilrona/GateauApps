@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+
+{% block layout_content %}
+
+<div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Creer une commande 2/3 </h1>
+              {% include 'includes/flash_message.html' %}
+            </div>
+            <nav class="navbar navbar-toolbar" role="navigation">
+              <div class="container-fluid">
+                <div class="btn-toolbar" role="toolbar">
+                  <div class="btn-group">
+                    <h2 style="margin: 0;">Liste des produits</h2>
+                  </div>
+                  <div class="btn-group pull-right">
+                    <a href="{{ url_for('commande.creerCupcake') }}" class="btn btn-primary">Ajouter un cupcake</a>
+                  </div>
+                  <div class="btn-group pull-right">
+                    <a href="{{ url_for('commande.creerSable') }}" class="btn btn-primary">Ajouter un sable</a>
+                  </div>
+                  <div class="btn-group pull-right">
+                    <a href="{{ url_for('commande.creerGateaux') }}" class="btn btn-primary">Ajouter un gateau</a>
+                  </div>
+                </div>
+              </div>
+            </nav>
+             <table class="table table-condensed">
+                <thead>
+                <tr>
+                    <th width="20%">Produit</th>
+                    <th width="20%" class="text-center">Qte</th>
+                    <th width="20%" class="text-center">Montant</th>
+                    <th width="15%">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                             {% for produit in liste_commande %}
+                                 {% if produit.type_produit == '1' %}
+                                     <tr>
+                                         <td>{{ produit.type_produit_id}} -  <strong>{{ produit.type_gateau_name }}</strong></td>
+                                         <td class="text-center">[{{ list_part[produit.nbre_part] }}] </td>
+                                         <td class="text-center">{% if produit.price %}{{ produit.price|format_price() }} FCFA {% else %} Prix non definit {% endif %}</td>
+                                         <td>
+                                            <a href="{{ url_for('commande.creerGateaux', gateau_id=(loop.index - 1)) }}" class="btn btn-link btn-xs"><i class="fa fa-pencil-square-o"></i></a>
+                                             <a class="btn btn-link btn-xs delete_product" href="{{ url_for('commande.delete', produit_id=(loop.index - 1)) }}"><i class="fa fa-trash"></i></a>
+                                             <a href="{{ url_for('commande.ProduitAjustementPrix', gateau_id=(loop.index - 1)) }}" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static">modifier le prix</a>
+
+                                         </td>
+                                     </tr>
+                                 {% endif %}
+                                 {% if produit.type_produit == '2' %}
+                                     <tr>
+                                         <td>{{ produit.type_produit_id}} -  <strong>{{ produit.type_gateau_name }} {{ produit.ruban_name }}</strong></td>
+                                         <td class="text-center">{{ produit.nbre_part }} </td>
+                                         <td class="text-center">{{ produit.price|format_price() }} FCFA </td>
+                                         <td>
+                                            <a href="{{ url_for('commande.creerSable', gateau_id=(loop.index - 1)) }}" class="btn btn-link btn-xs"><i class="fa fa-pencil-square-o"></i></a>
+                                             <a class="btn btn-link btn-xs delete_product" href="{{ url_for('commande.delete', produit_id=(loop.index - 1)) }}"><i class="fa fa-trash"></i></a>
+                                             <a href="{{ url_for('commande.ProduitAjustementPrix', gateau_id=(loop.index - 1)) }}" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static">modifier le prix</a>
+
+                                         </td>
+                                     </tr>
+                                 {% endif %}
+                                 {% if produit.type_produit == '3' %}
+                                     <tr>
+                                         <td>{{ produit.type_produit_id}} -  <strong>{{ produit.type_gateau_name }}</strong></td>
+                                         <td class="text-center">{{ produit.nbre_part }} </td>
+                                         <td class="text-center">{{ produit.price|format_price() }} FCFA </td>
+                                         <td>
+                                            <a href="{{ url_for('commande.creerCupcake', gateau_id=(loop.index - 1)) }}" class="btn btn-link btn-xs"><i class="fa fa-pencil-square-o"></i></a>
+                                             <a class="btn btn-link btn-xs delete_product" href="{{ url_for('commande.delete', produit_id=(loop.index - 1)) }}"><i class="fa fa-trash"></i></a>
+                                             <a href="{{ url_for('commande.ProduitAjustementPrix', gateau_id=(loop.index - 1)) }}" class="btn btn-default btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static">modifier le prix</a>
+
+                                         </td>
+                                     </tr>
+                                 {% endif %}
+                             {% else %}
+                             <tr>
+                                 <td colspan="4">
+                                     <h3 class="text-center">Aucun produit</h3>
+                                 </td>
+                             </tr>
+                            {% endfor %}
+
+                             </tbody>
+                             <tfooter>
+                                  <tr>
+                                     <td colspan="2"><strong>Montant Total</strong></td>
+                                     <td class="text-center"> <strong>{{ total|format_price() }} FCFA</strong> </td>
+                                      <td class="text-center"></td>
+                                 </tr>
+                             </tfooter>
+
+            </table>
+
+            <hr/>
+            <a href="{{ url_for('commande.recap_commande') }}" class="btn btn-success pull-right {% if not liste_commande|length %} disabled {% endif %}" style="margin: 10px;">Suivant</a>
+
+            <a href="{{ url_for('commande.infosClient') }}" class="btn btn-default pull-right" style="margin: 10px;">Retour</a>
+            <a href="{{ url_for('commande.index') }}" class="btn btn-danger pull-right" style="margin: 10px;">Annuler</a>
+
+        </div>
+
+</div>
+
+
+{% endblock %}

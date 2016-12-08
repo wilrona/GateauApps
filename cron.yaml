@@ -1,0 +1,18 @@
+cron:
+- description: Envoie des commandes de la journee suivante a 6h
+  url: /commande/planning/day
+  schedule: every day 06:00
+
+
+- description: Envoie des commandes de la journee suivante a 18h
+  url: /commande/planning/day_rappel
+  schedule: every day 18:00
+
+
+- description: Envoie des commandes de la semaine a 6h
+  url: /commande/planning/weekend
+  schedule: every day 06:10
+
+- description: Lier les events calendars avec les produits cres
+  url: /commande/planning/add_event/auto
+  schedule: every 1 hours

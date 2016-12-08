@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %} Parametrage | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_paramatre.html' %}      {% endblock %}
+
+{% block layout_content %}
+
+
+    <div class="col-lg-12">
+        <div class="page-header">
+          <h1>Liste des {{ name_data }} </h1>
+          {% include 'includes/flash_message.html' %}
+        </div>
+        <nav class="navbar navbar-toolbar" role="navigation">
+          <div class="container-fluid">
+            <div class="btn-toolbar" role="toolbar">
+              <div class="btn-group pull-right">
+
+                <a href="{{ url_for('config.edit', name_data=name_data) }}" class="btn btn-primary" data-toggle="modal" data-target="#myModal" data-backdrop="static">Creer</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+         <table class="table table-condensed table-hover">
+            <thead>
+            <tr>
+                <th width="65%">Nom {{ name_data }}</th>
+                <th width="25%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for data in datas %}
+                  <tr>
+                    <td>{{ data.name }}</td>
+                    <td>
+                        <a href="{{ url_for('config.edit', name_data=name_data, data_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i></a>
+
+{#                        <a href="{{ url_for('config.delete', name_data=name_data, data_id=data.key.id()) }}" class="btn btn-link btn-xs"><i class="fa fa-trash"></i></a>#}
+
+                    </td>
+                  </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3">
+                            <h4 class="text-center">Aucune information</h4>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+
+    </div>
+
+ {% endblock %}

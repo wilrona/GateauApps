@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %} Tableau de bord | {{ super() }}  {% endblock %}
+
+
+{% block layout_content %}
+
+    <div class="row">
+        <div class="col-lg-4 text-center">
+            <div class="placeholder bg-success">
+                <span >{{ commande_encours }}</span>
+            </div>
+            <h3>Commandes en cours</h3>
+        </div>
+        <div class=" col-lg-4 text-center">
+            <div class="placeholder bg-danger">
+                <span >{{ client }}</span>
+            </div>
+            <h3>Clients</h3>
+        </div>
+        <div class=" col-lg-4 text-center">
+            <div class="placeholder bg-info">
+                <span >{{ gateaux }}</span>
+            </div>
+            <h3>Gateaux</h3>
+        </div>
+    </div>
+<hr/>
+<div class="row">
+    <div class="col-lg-7">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Listes des commandes en cours</h4>
+            </div>
+            <div class="" style="height: 338px; overflow-y: auto">
+                <table class="table table-condensed">
+                <thead>
+                <tr>
+                    <th width="30%">Produit</th>
+                    <th width="10%" class="text-center">Qte</th>
+                    <th width="30%" class="text-center">Date livr.</th>
+                    <th width="10%"></th>
+                </tr>
+                </thead>
+.           <tbody>
+                    {% for data in datas %}
+                      <tr {% if data.livre %} class="info" {% else %} {% if data.annule %} class="active" {% endif %} {% endif %}>
+                        <td>{{ data.gateau_id.get().name }}</td>
+                        <td class="text-center">{{ data.qte }}</td>
+                        <td class="text-center">{{ data.date_liv|format_date('%d/%m/%Y') }} <br/> {{ data.heure_liv }}</td>
+                        <td>
+                            <a href="{{ url_for('commande.details', detail_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static">Détails</a>
+                        </td>
+                      </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4">
+                                <h4 class="text-center">Aucune information</h4>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Statistique commandes</h4>
+            </div>
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td>Commande en cours</td>
+                    <td>{{ stat_cmd_cours }}</td>
+                </tr>
+                <tr>
+                    <td>Commande livrée</td>
+                    <td>{{ stat_cmd_livre }}</td>
+                </tr>
+                <tr>
+                    <td>Commande annulée</td>
+                    <td>{{ stat_cmd_annule }}</td>
+                </tr>
+                <tr>
+                    <td>Total commande</td>
+                    <td>{{ stat_cmd_total }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Statistique des ventes</h4>
+            </div>
+            <table class="table">
+                <tbody>
+                <tr>
+                    <td>Nouvelles ventes</td>
+                    <td>{{ vente_cours|format_price() }} F</td>
+                </tr>
+                <tr>
+                    <td>Anciennes ventes</td>
+                    <td>{{ vente_ancienne|format_price() }} F</td>
+                </tr>
+                <tr>
+                    <td>Total ventes</td>
+                    <td>{{ vente_total|format_price() }} F</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

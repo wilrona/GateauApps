@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %} Commande | {{ super() }}  {% endblock %}
+
+{% block layout_nav_left %}    {% include 'includes/nav_left_commande.html' %}      {% endblock %}
+
+
+{% block layout_content %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+              <h1>Calendrier Planning de production</h1>
+            </div>
+            <iframe src="https://calendar.google.com/calendar/embed?title=Calendrier%20Planning%20Production&amp;showTitle=0&amp;showCalendars=0&amp;showTz=0&amp;height=800&amp;wkst=2&amp;hl=fr&amp;bgcolor=%23ffffff&amp;src=3ur4e0bo7gar9mgfcuomb1v6q8%40group.calendar.google.com&amp;color=%23182C57&amp;ctz=Africa%2FLagos" style="border-width:0" width="800" height="800" frameborder="0" scrolling="no"></iframe>
+        </div>
+    </div>
+{% endblock %}

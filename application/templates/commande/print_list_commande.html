@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <style>
+            @page {
+                size: letter landscape;
+                @frame header_frame {           /* Static Frame */
+                    -pdf-frame-content: header_content;
+                    width: 512pt; height: 40pt;
+                }
+                @frame content_frame {          /* Content Frame */
+                    left: 50pt; width: 512pt; top: 90pt; height: 632pt;
+                }
+                @frame footer_frame {           /* Another static Frame */
+                    -pdf-frame-content: footer_content;
+                    left: 50pt; width: 512pt; top: 772pt; height: 20pt;
+                }
+            }
+            img { zoom: 80%; }
+            .header{ padding: 20px; }
+
+
+
+        </style>
+    </head>
+    <body>
+        <div id="header_content">
+            <div class="header">
+                Header
+            </div>
+        </div>
+
+        <!-- Content for Static Frame 'footer_frame' -->
+        <div id="footer_content">(c) - page <pdf:pagenumber>
+            of <pdf:pagecount>
+        </div>
+
+        mon contenu
+
+{#        <h2>Some page title.</h2>#}
+{#        <table width="100%" cellpadding="4" cellspacing="0">#}
+{#            <tbody>#}
+{#                <tr>#}
+{#                    <td width="100%">Some text.</td>#}
+{#                </tr>#}
+{#            </tbody>#}
+{#            <tbody>#}
+{#                <tr style="border: 1px solid #eeeeee;">#}
+{#                    <td width="100%">#}
+{#                        <h3 style="text-align: center;">Some subtitle</h3>#}
+{#                        <div>User</div>#}
+{#                    </td>#}
+{#                </tr>#}
+{#            </tbody>#}
+{#        </table>#}
+{#        <hr/>#}
+{#        <img src="{{ url_for('static', filename='img/Logo-CC-2016.jpg', _external=True) }}"/>#}
+    </body>
+</html>
