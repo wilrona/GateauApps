@@ -1972,7 +1972,7 @@ def facture_versement(id_commande):
     return render_template('commande/facture_versement.html', **locals())
 
 
-@prefix.route('/commander/edit/infos/<int:id_commande>', methods=['GET', 'POST'])
+@prefix.route('/commander/edit/infos/<int:id_commande>', methods=['POST', 'GET'])
 @login_required
 @roles_required([('super_admin', 'update_facture')])
 def UpdateCommande(id_commande):
@@ -2028,7 +2028,7 @@ def UpdateCommande(id_commande):
         user_curent = Users.get_by_id(int(request.form['user']))
 
         cli_dif = False
-        if int(request.form['client_exist']):
+        if 'client_exist' in request.form:
             client_exist = Users.get_by_id(int(request.form['client_exist']))
 
             if client_exist.key.id() != commande.user.get().key.id():
@@ -2043,15 +2043,15 @@ def UpdateCommande(id_commande):
             else:
 
                 name_dif = False
-                if request.form['name'] and request.form['name'] != client_exist.name:
+                if 'name' in request.form and request.form['name'] != client_exist.name:
                     name_dif = True
 
                 email_dif = False
-                if client_exist.email != request.form['email'] and request.form['email']:
+                if 'email' in request.form and client_exist.email != request.form['email']:
                     email_dif = True
 
                 phone_dif = False
-                if request.form['phone'] and client_exist.phone != request.form['phone']:
+                if 'phone' in request.form and client_exist.phone != request.form['phone']:
                     phone_dif = True
 
                 if name_dif or email_dif or phone_dif:
@@ -2066,19 +2066,19 @@ def UpdateCommande(id_commande):
 
             form_client.id.data = client_exist.key.id()
 
-            if request.form['name']:
+            if 'name' in request.form:
                 client_exist.name = request.form['name']
                 form_client.name.data = request.form['name']
             else:
                 form_client.name.data = commande.user.get().name
 
-            if request.form['email']:
+            if 'email' in request.form:
                 client_exist.email = request.form['email']
                 form_client.email.data = request.form['email']
             else:
                 form_client.email.data = commande.user.get().email
 
-            if request.form['phone']:
+            if 'phone' in request.form:
                 client_exist.phone = request.form['phone']
                 form_client.phone.data = request.form['phone']
             else:
@@ -2091,6 +2091,7 @@ def UpdateCommande(id_commande):
             client_exist.name = request.form['name']
             client_exist.email = request.form['email']
             client_exist.phone = request.form['phone']
+            client_exist.client = True
 
             client_exist.put()
 

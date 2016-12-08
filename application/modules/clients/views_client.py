@@ -102,10 +102,19 @@ def edit(client_id=None):
 @login_required
 def delete(client_id):
 
+    from ..commande.models_commande import Commande
+
     client = Users.get_by_id(client_id)
 
-    client.key.delete()
-    flash('Suppression reussie', 'success')
+    commande_client = Commande.query(
+        Commande.user == client.key
+    ).count()
 
-    return redirect(url_for('client.index'))
+    if not commande_client:
+        client.key.delete()
+        flash('Suppression reussie', 'success')
+    else:
+        flash('Ce client possede des commandes dans l\'application', 'warning')
+
+    return redirect(url_for('clients.index'))
 
