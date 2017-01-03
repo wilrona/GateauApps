@@ -53,6 +53,13 @@ class Versement(ndb.Model):
     commande_id = ndb.KeyProperty(kind=Commande)
     dateVers = ndb.DateProperty()
     montant = ndb.FloatProperty()
+    send_bill = ndb.BooleanProperty(default=True)
+
+
+class PrintFacture(ndb.Model):
+    create = ndb.DateTimeProperty(auto_now_add=True)
+    pdf = ndb.BlobProperty()
+    commade_id = ndb.KeyProperty(kind=Commande)
 
 
 class ProduitCommander(ndb.Model):

@@ -748,3 +748,42 @@ def calendar_event_delete(id_produit):
             events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
 
     return 'True'
+
+
+@prefix_planning.route('/create_pdf/<int:facture_id>')
+def facturePDF(facture_id):
+
+    import cStringIO
+    output = cStringIO.StringIO()
+
+    style = getSampleStyleSheet()
+    width, height = landscape(letter)
+
+    # topMargin = 20.5*cm
+    # leftMargin = cm*12.5
+    # leftMargin2 = cm*22.5
+    # bottomMargin = cm/2
+
+    p = canvas.Canvas(output, pagesize=portrait(letter))
+    p.setTitle('Facture_Commande')
+
+
+    # string = '<font name="Times-Roman" size="24">%s</font>'
+    # header = string % url_for('static', filename='Bande-2.jpg', _external=True)
+    #
+    # c = Paragraph(header, style=style['Normal'])
+    # wti, hti = c.wrapOn(p, width, height)
+    # c.drawOn(p, width - wti + 10.5*cm, 19.5*cm)
+
+    p.drawImage(url_for('static', filename='Bande-2.jpg', _external=True), 0, 0, width=width, height=9.9*cm, preserveAspectRatio=True)
+
+
+    p.showPage()
+    p.save()
+    pdf_out = output.getvalue()
+    output.close()
+
+    response = make_response(pdf_out)
+    response.headers["Content-Type"] = "application/pdf"
+
+    return response

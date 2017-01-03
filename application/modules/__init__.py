@@ -24,7 +24,7 @@ import lib.reportlab
 
 #import pour l'impression des ticket
 from lib.reportlab.pdfgen import canvas
-from lib.reportlab.lib.pagesizes import A5, letter, landscape
+from lib.reportlab.lib.pagesizes import A5, letter, landscape, portrait
 # from lib.reportlab.platypus.doctemplate import SimpleDocTemplate
 from lib.reportlab.lib import colors
 from lib.reportlab.lib.units import cm, mm

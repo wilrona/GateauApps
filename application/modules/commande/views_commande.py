@@ -302,7 +302,7 @@ def index_refresh():
 
                 datas = datas[offset_start:offset_end]
 
-            data= [
+            data = [
                     [ref, client,theme, Dcmd, Dliv, Time]
 
                   ]
