@@ -4,7 +4,7 @@ from ...modules import *
 from ..user.models_user import Users
 from ..user.forms_user import FormUser
 from models_commande import Commande, Produit, Event, Param, TypeGateaux, Versement, ProduitCommander, MouleProduit, \
-    Composition, Activite
+    Composition, Activite, PdfTable
 from ..gateau.models_gateau import PrixGateaux
 from forms_commande import FormCommande
 
@@ -1633,6 +1633,9 @@ def commande_terminer():
     import requests
     dateLivar = commande.dateLiv
 
+    if float(info_client['accompte']) and float(info_client['accompte']) == commande.montant:
+        commande.mail_solde = 1
+
     commande = commande.put()
 
 
@@ -1954,6 +1957,16 @@ def facture_versement(id_commande):
         vers.commande_id = commande.key
         vers.put()
 
+        verse_amount = 0
+        for versement in commande.versement():
+            verse_amount += versement.montant
+
+        if verse_amount == commande.montant:
+            commande.mail_type = 1
+
+        commande.mail_send = False
+        commande.put()
+
         return redirect(url_for('commande.facture_versement', id_commande=id_commande))
 
     versements = Versement.query(
@@ -2134,6 +2147,9 @@ def UpdateCommande(id_commande):
             commande.nameConcerne = forme.concerne.data
             commande.infos = forme.info.data
 
+            commande.mail_type = 2
+            commande.mail_send = False
+
             commande.put()
 
             if cli_dif or liv_dif or tim_dif or the_dif:
@@ -2198,6 +2214,7 @@ def updateGateaux(id_commande, gateau_id=None):
 
     current_commande = Commande.get_by_id(id_commande)
 
+
     activite = Activite()
     activite.entite = 'Gateaux'
 
@@ -2205,6 +2222,9 @@ def updateGateaux(id_commande, gateau_id=None):
         current_gateau = ProduitCommander.get_by_id(gateau_id)
         
         current_commande.verif_calendar = False
+        if request.method == 'POST':
+            current_commande.mail_type = 2
+            current_commande.mail_send = False
         current_commande.put()
 
         activite.action = 2
@@ -2568,6 +2588,9 @@ def updateCupcake(id_commande, gateau_id=None):
         current_gateau = ProduitCommander.get_by_id(gateau_id)        
         
         current_commande.verif_calendar = False
+        if request.method == 'POST':
+            current_commande.mail_type = 2
+            current_commande.mail_send = False
         current_commande.put()
 
         activite.action = 2
@@ -2674,6 +2697,9 @@ def updateSable(id_commande, gateau_id=None):
         current_gateau = ProduitCommander.get_by_id(gateau_id)
         
         current_commande.verif_calendar = False
+        if request.method == 'POST':
+            current_commande.mail_type = 2
+            current_commande.mail_send = False
         current_commande.put()
 
         activite.action = 2
@@ -2725,24 +2751,48 @@ def updateSable(id_commande, gateau_id=None):
 
 @prefix.route('/correction')
 def correction():
-    all_produit = ProduitCommander.query()
+    all_commande = Commande.query().order(Commande.dateCmd)
 
-    for produit in all_produit:
-        position = 1
-        for moule in produit.list_moule__Correction():
-            if moule.position is None:
-                moule.position = position
-                moule.put()
-                position += 1
+    show = []
 
-            position_layer = 1
-            for layer in moule.list_composition():
-                if layer.position is None:
-                    layer.position = position_layer
-                    layer.put()
-                    position_layer += 1
 
-    return 'True'
+    count = 1
+    for commande in all_commande:
+        try:
+            client = commande.user.get().name
+            year_cmd = commande.dateCmd.year
+            commande.ref = 'CC/'+str(year_cmd)+'/'+str(count)
+            commande.put()
+            count += 1
+        except AttributeError:
+            commande.key.delete()
+        # try:
+        #
+        # except AttributeError
+        # show.append((commande.user.get().name, commande.user))
+
+        # accompte = 0
+        # for versement in commande.versement():
+        #     accompte += versement.montant
+        #
+        # if commande.montant == accompte:
+        #     commande.mail_type = 1
+        # commande.mail_send = False
+        # commande.put()
+
+
+    # all_user = Users.query(
+    #     Users.client == True
+    # )
+    #
+    #
+    #
+    # for user in all_user:
+    #     client = user.email
+    #     match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', client)
+    #     show.append((user.name, user.email))
+
+    return 'TRUE'
 
 
 @prefix.route('/check_pin', methods=['GET', 'POST'])
@@ -2765,3 +2815,337 @@ def check_pin():
             send = True
 
     return render_template('commande/check_pin.html', **locals())
+
+
+@prefix.route('/facture/pdf/<int:facture_id>')
+def facturePDF(facture_id):
+
+    current_facture = Commande.get_by_id(facture_id)
+
+    import cStringIO
+    output = cStringIO.StringIO()
+
+    style = getSampleStyleSheet()
+    width, height = portrait(letter)
+
+    topMargin = 19.5*cm
+    # leftMargin = cm*12.5
+    # leftMargin2 = cm*22.5
+    bottomMargin = cm/2
+
+    p = canvas.Canvas(output, pagesize=portrait(letter))
+    p.setTitle('Facture_Commande')
+    image = ImageReader(url_for('static', filename='Bande.jpg', _external=True))
+    wi, hi = image.getSize()
+    p.drawImage(url_for('static', filename='Bande.jpg', _external=True), 0, height - hi, width=width, height=hi, preserveAspectRatio=False)
+
+    string = '<font name="Times-Italic" size="24">%s</font>'
+    string_2 = '<font name="Times-Bold" size="24">%s</font>'
+    ref = string % current_facture.ref
+    header = string_2 % 'Facture : '+ref
+    c = Paragraph(header, style=style['Title'])
+    wti, hti = c.wrapOn(p, width, height)
+    c.drawOn(p, width - wti, topMargin)
+
+    string = '<font name="Times-Italic" size="12">%s</font>'
+    string_2 = '<font name="Times-Bold" size="12">%s</font>'
+    name = string % current_facture.user.get().name
+    show_name = string_2 % ' Nom client : '+name
+    c = Paragraph(show_name, style=style['Code'])
+    wti_name, hti_name = c.wrapOn(p, width, height)
+    c.drawOn(p, width - wti_name, topMargin - 1.5*cm)
+
+    string = '<font name="Times-Italic" size="12">%s</font>'
+    string_2 = '<font name="Times-Bold" size="12">%s</font>'
+    email = string % current_facture.user.get().email
+    show_email = string_2 % ' Email : '+email
+    c = Paragraph(show_email, style=style['Code'])
+    wti_name, hti_name = c.wrapOn(p, width, height)
+    c.drawOn(p, width - wti_name, topMargin - 2*cm)
+
+    string = '<font name="Times-Italic" size="12">%s</font>'
+    string_2 = '<font name="Times-Bold" size="12">%s</font>'
+    phone = string % current_facture.user.get().phone
+    show_phone = string_2 % ' Telephone : '+phone
+    c = Paragraph(show_phone, style=style['Code'])
+    wti_name, hti_name = c.wrapOn(p, width, height)
+    c.drawOn(p, width - wti_name, topMargin - 2.5*cm)
+
+
+    string = '<font name="Times-Italic" size="16">%s</font>'
+    string_2 = '<font name="Times-Bold" size="16">%s</font>'
+    phone = string % current_facture.theme
+
+    styleBH = style["Title"]
+    styleBH.alignment = TA_CENTER
+
+    show_phone = string_2 % ' Theme : '+phone
+    c = Paragraph(show_phone, style=styleBH)
+    wti_name, hti_name = c.wrapOn(p, width, height)
+    c.drawOn(p, width - wti_name, topMargin - 4*cm)
+
+
+    string = '<font name="Times-Italic" size="12">%s</font>'
+    string_2 = '<font name="Times-Bold" size="12">%s</font>'
+    date = string % function.format_date(current_facture.dateCmd, "%d/%m/%Y")
+    show_date = string_2 % ' Date commande : '+date
+    c = Paragraph(show_date, style=style['Code'])
+    wti, hti = c.wrapOn(p, width, height)
+    c.drawOn(p, width - wti + 10.5*cm, topMargin - 1.5*cm)
+
+    string = '<font name="Times-Italic" size="12">%s</font>'
+    string_2 = '<font name="Times-Bold" size="12">%s</font>'
+    date = string % function.format_date(current_facture.dateLiv, "%d/%m/%Y") +' '+ string % function.format_date(current_facture.timeLiv, "%H:%M")
+    show_date = string_2 % ' Date Livraison : '+date
+    c = Paragraph(show_date, style=style['Code'])
+    wti, hti = c.wrapOn(p, width, height)
+    c.drawOn(p, width - wti + 10.5*cm, topMargin - 2*cm)
+
+    string = '<font name="Times-Italic" size="12">%s</font>'
+    string_2 = '<font name="Times-Bold" size="12">%s</font>'
+    title = string % current_facture.event_id.get().name
+    show_date = string_2 % ' Evenement : '+title
+    c = Paragraph(show_date, style=style['Code'])
+    wti, hti = c.wrapOn(p, width, height)
+    c.drawOn(p, width - wti + 10.5*cm, topMargin - 2.5*cm)
+
+    total = 0
+    for produit in current_facture.produit_commande(True):
+        montant = produit.prix
+        total = total + montant
+
+    total_accompte = total
+    accompte = 0
+    for versement in current_facture.versement():
+        total_accompte = total - versement.montant
+        accompte += versement.montant
+
+
+    styleN = style["Italic"]
+    styleN.alignment = TA_LEFT
+    styleBH = style["Italic"]
+    styleBH.alignment = TA_LEFT
+
+    # Headers
+    design = Paragraph('''<b>Designation</b>''', styleBH)
+    qte = Paragraph('''<b>Quantite</b>''', styleBH)
+    montant = Paragraph('''<b>Montant</b>''', styleBH)
+
+    #recuperation des donnees
+    datas = [items for items in current_facture.produit_commande(True)]
+
+    data = [
+                [design, qte, montant]
+           ]
+
+    for i in datas:
+
+        text_design = ''
+        text_qte = ''
+        text_montant = ''
+        string = '<font name="Times-Italic" size="11">%s</font>'
+        string_2 = '<font name="Times-Bold" size="11">%s</font>'
+        list_part = global_part
+
+        if i.produit_id.get().type_produit == 1:
+            text_design += string % i.produit_id.get().name +' - '+ string_2 % i.typeGateau_id.get().name
+            text_design += ' | '
+            text_design += string_2 % 'Categorie :' +' '+ string % i.categorie_id.get().name
+            text_design += ' | '
+            moule_count = 1
+            for moule in i.list_moule_NIden():
+                text_design += string_2 % 'moule'+ string_2 % str(moule_count)
+                text_design += string % '('
+                text_design += string_2 % 'Type : '
+                text_design += string % moule.name_moule()+', '
+                text_design += string_2 % 'Qte : '
+                text_design += string % str(moule.qte) +', '
+
+                layer_count = 1
+                for layer in moule.list_composition():
+                    text_design += string_2 % 'Layer' + string_2 % str(layer_count) + string_2 % ' : '
+                    text_design += string % layer.name_goutcreme() + ', '
+                    if layer.imbibage_id:
+                        text_design += string % layer.name_imbibage() + ', '
+                    if layer.coulis_id:
+                        text_design += string % layer.name_coulis() + ', '
+                    layer_count += 1
+
+                text_design += ") "
+                moule_count += 1
+
+                if moule.nbre_identique_count():
+                    for identique in moule.nbre_identique():
+                        text_design +=  " | "
+                        text_design += string_2 % 'Moule '+str(moule_count)
+                        text_design += string % 'Layer identique aux layers du'
+                        text_design += string_2 % 'moule' +str(moule_count - 1)
+                        text_design += string % '('
+                        text_design += string_2 % 'Type :'
+                        text_design += string % str(identique.name_moule())
+                        text_design += string_2 % 'Qte :'
+                        text_design += string % identique.qte + ", "
+                        moule_count += 1
+
+            if i.impression and not i.pate:
+                text_design += ' | '
+                text_design += string % 'Impression'
+            if i.pate and not i.impression:
+                text_design += ' | '
+                text_design += string % 'Pate'
+            if i.pate and i.impression:
+                text_design += ' | '
+                text_design += string % 'Impression & Pate'
+
+            text_design += ' | '
+            text_design += string_2 % 'Observation :' + '' + string % i.observation
+
+            text_qte = string % '['+ string % list_part[i.nbrPart]+ string % ']'
+            text_montant = string % str(function.format_price(i.prix))
+
+
+        if i.produit_id.get().type_produit == 2:
+            text_design += string % i.produit_id.get().name +' - '+ string_2 % i.typeGateau_id.get().name +' '+string_2 % i.couleurRuban_id.get().name
+            text_design += ' | '
+
+            if i.emballage:
+                text_design += string % 'Emballage |'
+            else:
+                text_design += string % 'Sans Emballage |'
+
+            if i.impression and not i.pate:
+                text_design += string % 'Impression' + ' | '
+            if i.pate and not i.impression:
+                text_design += string % 'Pate' + ' | '
+            if i.pate and i.impression:
+                text_design += string % 'Impression & Pate' + ' | '
+
+            text_design += string_2 % 'Observation :' + '' + string % i.observation
+
+            text_qte = string % i.qte
+            text_montant = string % str(function.format_price(i.prix))
+
+
+        if i.produit_id.get().type_produit == 3:
+            text_design += string % i.produit_id.get().name +' - '+ string_2 % i.typeGateau_id.get().name
+            text_design += ' | '
+
+
+            for compos in i.list_composition():
+                text_design += string_2 % 'Gout de creme : ' + string % compos.name_goutcreme()
+                text_design += ' | '
+                text_design += string_2 % 'Fourrage : ' + string % compos.name_fourage()
+
+                if compos.coulis_id:
+                    text_design += ' | '
+                    text_design += string_2 % 'Coulis : ' + string % compos.name_coulis()
+
+                if compos.imbibage_id:
+                    text_design += string_2 % 'Imbibage : ' + string % compos.name_imbibage()
+                    text_design += ' | '
+
+                if compos.topping_id:
+                    text_design += ' | '
+                    text_design += string_2 % 'Topping : ' + string % compos.name_topping()
+
+                if compos.couleur_cup_id:
+                    text_design += ' | '
+                    text_design += string_2 % 'Couleur Cup : ' + string % compos.name_couleur_cup()
+
+
+            text_design += ' | '
+            text_design += string_2 % 'Observation :' + '' + string % i.observation
+
+            text_qte = string % i.qte
+            text_montant = string % str(function.format_price(i.prix))
+
+
+
+        design = Paragraph(text_design, styleN)
+        qte = Paragraph(text_qte, styleN)
+        montant = Paragraph(text_montant, styleN)
+        current = [design, qte, montant]
+        data.append(current)
+
+    tot = string % function.format_price(total)
+    data.append([Paragraph(string_2 % 'TOTAL', styleN), '' , Paragraph(tot, styleN)])
+    acco = string % function.format_price(accompte)
+    data.append([Paragraph(string_2 % 'Accompte', styleN), '', Paragraph(acco, styleN)])
+    reste = string % function.format_price(total_accompte)
+    data.append([Paragraph(string_2 % 'Reste a payer', styleN), '', Paragraph(reste, styleN)])
+
+    table = Table(data, colWidths=[10*cm, 5*cm, 5*cm])
+
+    table.setStyle(TableStyle([
+                           ('BACKGROUND',(0,0),(-1,0),'#ffdcea'),
+                           ('TEXTCOLOR', (0,0),(-1,0),'#ffffff'),
+                           ('INNERGRID', (0,0), (-1,-1), 0.25, '#000000'),
+                           ('BOX', (0,0), (-1,-1), 0.25, '#000000'),
+                           ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+                        ]))
+
+
+    table.wrapOn(p, width, height)
+    wt, ht = table.wrap(width, height)
+    table.drawOn(p, width - wt - 0.9*cm, height - ht - hi - 6*cm)
+
+
+
+    devis = 'La devise est le Franc CFA'
+    c = Paragraph(devis, style=style['Italic'])
+    wd, hd = c.wrapOn(p, width, ht)
+    c.drawOn(p, width - wd + 0.9*cm, bottomMargin + 3.5*cm)
+
+    image = ImageReader(url_for('static', filename='font-color-2.jpg', _external=True))
+    wi, hi = image.getSize()
+    p.drawImage(url_for('static', filename='font-color-2.jpg', _external=True), 0, bottomMargin - 1*cm, width=width, height=hi, preserveAspectRatio=False)
+
+
+    time_zones = pytz.timezone('Africa/Douala')
+    date_auto_nows = datetime.datetime.now(time_zones).strftime("%Y-%m-%d %H:%M:%S")
+    string = '<font name="Times-Italic" size="8">%s</font>'
+    devis = string % 'genere le '+ string % function.format_date(function.datetime_convert(date_auto_nows), '%d/%m/%Y %H:%M')
+    c = Paragraph(devis, style=style["Italic"])
+    wd, hd = c.wrapOn(p, width, ht)
+    c.drawOn(p, width - wd + 0.9*cm, bottomMargin)
+
+
+    styleBH = style["Italic"]
+    styleBH.alignment = TA_CENTER
+    devis = 'CREATIVE CAKE, marque de SO.INVEST Ets., BP 4219 Douala'
+    c = Paragraph(devis, styleBH)
+    wd, hd = c.wrapOn(p, width, ht)
+    c.drawOn(p, width - wd, bottomMargin * 4)
+
+    devis = 'Tel: 651221122 / 655353506 / 698987515'
+    c = Paragraph(devis, styleBH)
+    wd, hd = c.wrapOn(p, width, ht)
+    c.drawOn(p, width - wd, bottomMargin * 3)
+
+    devis = 'info@creative-cake-design.com / www.creative-cake-design.com'
+    c = Paragraph(devis, styleBH)
+    wd, hd = c.wrapOn(p, width, ht)
+    c.drawOn(p, width - wd, bottomMargin * 2)
+
+    devis = 'RC/DLA/2013/A/705 - P097800367635W'
+    c = Paragraph(devis, styleBH)
+    wd, hd = c.wrapOn(p, width, ht)
+    c.drawOn(p, width - wd, bottomMargin)
+
+    p.showPage()
+    p.save()
+    pdf_out = output.getvalue()
+
+    # if request.args.get('send'):
+    #     blob = PdfTable()
+    #     blob.archivoBlob = pdf_out
+    #     blob.commande_id = current_facture.key
+    #     blob.put()
+    #     return 'true'
+    # else:
+    output.close()
+
+    response = make_response(pdf_out)
+    response.headers["Content-Type"] = "application/pdf"
+
+    return response

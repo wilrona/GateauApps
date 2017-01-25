@@ -37,6 +37,8 @@ from lib.reportlab.pdfbase.ttfonts import TTFont
 from lib.reportlab.lib.colors import black, white
 from lib.reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER
 
+from lib.reportlab.lib.utils import ImageReader
+
 from lib.reportlab.graphics.barcode import code39, createBarcodeDrawing
 
 # Appel de l'ensemble des fonctions crees

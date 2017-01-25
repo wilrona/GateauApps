@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <style>
+      @media only screen and (max-device-width: 480px) {
+        /* mobile-specific CSS styles go here */
+      }
+    </style>
+  </head>
+  <body>
+    <img src="{{ url_for('static', filename='Bande.jpg', _external=True) }}" alt="" width="100%"/>
+
+    {% if create %}
+    <p>Bonjour {{ name }} <br />
+        Merci pour votre commande passée chez Creative Cake, vous trouverez ci-joint la facture correspondante à votre accompte ainsi que nos conditions générales de ventes: </p>
+    <p><br /> Date : {{ date }} <br /> Heure du retrait : {{ livraison }} <br /> Theme : {{ theme }} </p>
+    <p><br /> Nous sommes à votre disposition pour toutes modifications à apporter (jusqu'a 72 heure avant ) sur votre commande au 651221122.
+        <br/> Le paiement total de la facture devra se faire au plutard le jour du retrait.
+    <br /> Nous vous remercions de la confiance que vous accorde à Creative Cake et espérons en être digne.</p>
+    <p><br /> Nous vous disons à très bientot</p>
+    {% else %}
+    <p>Bonjour {{ name }} <br /> Vous avez passé une commande chez Creative Cake et espérons qu'elle vous à donné entiere satisfaction.</p>
+    <p>Vous trouverez ci-joint la facture correspondante à votre commande</p>
+        <p><br /> Date : {{ date }} <br /> Heure du retrait : {{ livraison }} <br /> Theme : {{ theme }} </p>
+    <p>Merci de nous aider à nous évaluer à travers ce petit questionnaire de satisfaction ( qui vous prendra moins de 1 minute) afin que nous continuons à nous améliorer ! </p>
+    <p>http://creative-cake-design.com/satisfaction-client/ </p>
+    <p>Toute l'equipe vous remercie de la confiance que vous accordez à Creative Cake et espérons continuer à en être digne.
+    <br/>A très bientot
+    </p>
+    {% endif %}
+    <p><br /> Celine S.TAYOU <br /> Cake designer &amp; founder <br /> 698987515<br /> info@creative-cake-design.com<br /> www.creative-cake-design.com</p>
+  </body>
+</html>

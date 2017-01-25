@@ -13,7 +13,7 @@ class Users(ndb.Model):
 
     is_enabled = ndb.BooleanProperty(default=False)
     name = ndb.StringProperty()
-    email = ndb.StringProperty()
+    email = ndb.StringProperty(default=None)
     phone = ndb.StringProperty()
     logged = ndb.BooleanProperty(default=False)
     date_last_logged = ndb.DateTimeProperty()

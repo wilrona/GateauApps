@@ -1,7 +1,7 @@
 __author__ = 'Ronald'
 
 from ...modules import *
-from ..commande.models_commande import ProduitCommander, Commande
+from ..commande.models_commande import ProduitCommander, Commande, PdfTable
 
 
 # Flask-Cache (configured to use App Engine Memcache API)
@@ -749,41 +749,452 @@ def calendar_event_delete(id_produit):
 
     return 'True'
 
+@prefix_planning.route('/send_facture/<int:id_facture>')
+def send_facture_test(id_facture):
+    from google.appengine.api import mail
 
-@prefix_planning.route('/create_pdf/<int:facture_id>')
-def facturePDF(facture_id):
+    commande = Commande.get_by_id(int(id_facture))
 
-    import cStringIO
-    output = cStringIO.StringIO()
+    message = mail.EmailMessage()
 
-    style = getSampleStyleSheet()
-    width, height = landscape(letter)
+    create = False
 
-    # topMargin = 20.5*cm
-    # leftMargin = cm*12.5
-    # leftMargin2 = cm*22.5
-    # bottomMargin = cm/2
+    name = commande.user.get().name
+    date = function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+    livraison = function.format_date(function.date_convert(commande.dateLiv), '%d/%m/%Y')+' '+function.format_date(function.time_convert(commande.timeLiv), '%H:%M')
+    theme = commande.theme
 
-    p = canvas.Canvas(output, pagesize=portrait(letter))
-    p.setTitle('Facture_Commande')
+    template = render_template('commande/planning/email_facture.html', **locals())
+    message.html = template
+
+    message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
+    message.subject = 'Test Information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+    message.to = 'celine.guemnietafo@gmail.com'
+
+    pdf_file = PdfTable.query(
+        PdfTable.commande_id == commande.key
+    ).get()
+
+    message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob)]
+
+    # message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob)]
+
+    send = message.send()
+
+    return 'TRUE'
 
 
-    # string = '<font name="Times-Roman" size="24">%s</font>'
-    # header = string % url_for('static', filename='Bande-2.jpg', _external=True)
-    #
-    # c = Paragraph(header, style=style['Normal'])
-    # wti, hti = c.wrapOn(p, width, height)
-    # c.drawOn(p, width - wti + 10.5*cm, 19.5*cm)
 
-    p.drawImage(url_for('static', filename='Bande-2.jpg', _external=True), 0, 0, width=width, height=9.9*cm, preserveAspectRatio=True)
+@prefix_planning.route('/send_facture')
+def send_facture():
+    from google.appengine.api import mail
+    import re
+
+    all_commande = Commande.query(
+        Commande.mail_send == False
+    )
+
+    for commande in all_commande:
+        if commande.user.get().email:
+            client = commande.user.get().email
+            match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', client)
+
+            if commande.mail_type == 0 and match:
+                message = mail.EmailMessage()
+
+                create = True
+                name = commande.user.get().name
+                date = function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                livraison = function.format_date(function.date_convert(commande.dateLiv), '%d/%m/%Y')+' '+function.format_date(function.time_convert(commande.timeLiv), '%H:%M')
+                theme = commande.theme
+
+                template = render_template('commande/planning/email_facture.html', **locals())
+                message.html = template
+
+                message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
+                message.subject = 'Information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                message.to = client
+
+                document = url_for('static', filename='Conditions-Generales-de-vente-CCD.pdf', _external=True)
+
+                pdf_file = PdfTable.query(
+                    PdfTable.commande_id == commande.key
+                ).get()
+
+                message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob),('Condition-vente.pdf', document)]
+
+                send = message.send()
+
+                commande.mail_send = True
+                commande.put()
+
+                pdf_file.key.delete()
+
+            if commande.mail_type == 1 and match:
+                message = mail.EmailMessage()
+
+                create = False
+                name = commande.user.get().name
+                date = function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                livraison = function.format_date(function.date_convert(commande.dateLiv), '%d/%m/%Y')+' '+function.format_date(function.time_convert(commande.timeLiv), '%H:%M')
+                theme = commande.theme
+
+                template = render_template('commande/planning/email_facture.html', **locals())
+                message.html = template
 
 
-    p.showPage()
-    p.save()
-    pdf_out = output.getvalue()
-    output.close()
+                message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
+                message.subject = 'Solde de votre commande '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                message.to = client
 
-    response = make_response(pdf_out)
-    response.headers["Content-Type"] = "application/pdf"
+                pdf_file = PdfTable.query(
+                    PdfTable.commande_id == commande.key
+                ).get()
 
-    return response
+                message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob)]
+
+                send = message.send()
+
+                commande.mail_send = True
+                commande.put()
+
+                pdf_file.key.delete()
+
+    return 'True'
+
+
+@prefix_planning.route('/facture/save')
+def facturePDF_save():
+
+    import re
+
+    all_commande = Commande.query(
+        Commande.mail_send == False
+    )
+
+    for current_facture in all_commande:
+        if current_facture.user and current_facture.user.get().email is not None:
+            client = current_facture.user.get().email
+            match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', client)
+            # current_facture = Commande.get_by_id(facture_id)
+            if match and (current_facture.mail_type == 0 or current_facture.mail_type == 1):
+                import cStringIO
+                output = cStringIO.StringIO()
+
+                style = getSampleStyleSheet()
+                width, height = portrait(letter)
+
+                topMargin = 19.5*cm
+                # leftMargin = cm*12.5
+                # leftMargin2 = cm*22.5
+                bottomMargin = cm/2
+
+                p = canvas.Canvas(output, pagesize=portrait(letter))
+                p.setTitle('Facture_Commande')
+                image = ImageReader(url_for('static', filename='Bande.jpg', _external=True))
+                wi, hi = image.getSize()
+                p.drawImage(url_for('static', filename='Bande.jpg', _external=True), 0, height - hi, width=width, height=hi, preserveAspectRatio=False)
+
+                string = '<font name="Times-Italic" size="24">%s</font>'
+                string_2 = '<font name="Times-Bold" size="24">%s</font>'
+                ref = string % current_facture.ref
+                header = string_2 % 'Facture : '+ref
+                c = Paragraph(header, style=style['Title'])
+                wti, hti = c.wrapOn(p, width, height)
+                c.drawOn(p, width - wti, topMargin)
+
+                string = '<font name="Times-Italic" size="12">%s</font>'
+                string_2 = '<font name="Times-Bold" size="12">%s</font>'
+                name = string % current_facture.user.get().name
+                show_name = string_2 % ' Nom client : '+name
+                c = Paragraph(show_name, style=style['Code'])
+                wti_name, hti_name = c.wrapOn(p, width, height)
+                c.drawOn(p, width - wti_name, topMargin - 1.5*cm)
+
+                string = '<font name="Times-Italic" size="12">%s</font>'
+                string_2 = '<font name="Times-Bold" size="12">%s</font>'
+                email = string % current_facture.user.get().email
+                show_email = string_2 % ' Email : '+email
+                c = Paragraph(show_email, style=style['Code'])
+                wti_name, hti_name = c.wrapOn(p, width, height)
+                c.drawOn(p, width - wti_name, topMargin - 2*cm)
+
+                string = '<font name="Times-Italic" size="12">%s</font>'
+                string_2 = '<font name="Times-Bold" size="12">%s</font>'
+                phone = string % current_facture.user.get().phone
+                show_phone = string_2 % ' Telephone : '+phone
+                c = Paragraph(show_phone, style=style['Code'])
+                wti_name, hti_name = c.wrapOn(p, width, height)
+                c.drawOn(p, width - wti_name, topMargin - 2.5*cm)
+
+
+                string = '<font name="Times-Italic" size="16">%s</font>'
+                string_2 = '<font name="Times-Bold" size="16">%s</font>'
+                phone = string % current_facture.theme
+
+                styleBH = style["Title"]
+                styleBH.alignment = TA_CENTER
+
+                show_phone = string_2 % ' Theme : '+phone
+                c = Paragraph(show_phone, style=styleBH)
+                wti_name, hti_name = c.wrapOn(p, width, height)
+                c.drawOn(p, width - wti_name, topMargin - 4*cm)
+
+
+                string = '<font name="Times-Italic" size="12">%s</font>'
+                string_2 = '<font name="Times-Bold" size="12">%s</font>'
+                date = string % function.format_date(current_facture.dateCmd, "%d/%m/%Y")
+                show_date = string_2 % ' Date commande : '+date
+                c = Paragraph(show_date, style=style['Code'])
+                wti, hti = c.wrapOn(p, width, height)
+                c.drawOn(p, width - wti + 10.5*cm, topMargin - 1.5*cm)
+
+                string = '<font name="Times-Italic" size="12">%s</font>'
+                string_2 = '<font name="Times-Bold" size="12">%s</font>'
+                date = string % function.format_date(current_facture.dateLiv, "%d/%m/%Y") +' '+ string % function.format_date(current_facture.timeLiv, "%H:%M")
+                show_date = string_2 % ' Date Livraison : '+date
+                c = Paragraph(show_date, style=style['Code'])
+                wti, hti = c.wrapOn(p, width, height)
+                c.drawOn(p, width - wti + 10.5*cm, topMargin - 2*cm)
+
+                string = '<font name="Times-Italic" size="12">%s</font>'
+                string_2 = '<font name="Times-Bold" size="12">%s</font>'
+                title = string % current_facture.event_id.get().name
+                show_date = string_2 % ' Evenement : '+title
+                c = Paragraph(show_date, style=style['Code'])
+                wti, hti = c.wrapOn(p, width, height)
+                c.drawOn(p, width - wti + 10.5*cm, topMargin - 2.5*cm)
+
+                total = 0
+                for produit in current_facture.produit_commande(True):
+                    montant = produit.prix
+                    total = total + montant
+
+                total_accompte = total
+                accompte = 0
+                for versement in current_facture.versement():
+                    total_accompte = total - versement.montant
+                    accompte += versement.montant
+
+
+                styleN = style["Italic"]
+                styleN.alignment = TA_LEFT
+                styleBH = style["Italic"]
+                styleBH.alignment = TA_LEFT
+
+                # Headers
+                design = Paragraph('''<b>Designation</b>''', styleBH)
+                qte = Paragraph('''<b>Quantite</b>''', styleBH)
+                montant = Paragraph('''<b>Montant</b>''', styleBH)
+
+                #recuperation des donnees
+                datas = [items for items in current_facture.produit_commande(True)]
+
+                data = [
+                            [design, qte, montant]
+                       ]
+
+                for i in datas:
+
+                    text_design = ''
+                    text_qte = ''
+                    text_montant = ''
+                    string = '<font name="Times-Italic" size="11">%s</font>'
+                    string_2 = '<font name="Times-Bold" size="11">%s</font>'
+                    list_part = global_part
+
+                    if i.produit_id.get().type_produit == 1:
+                        text_design += string % i.produit_id.get().name +' - '+ string_2 % i.typeGateau_id.get().name
+                        text_design += ' | '
+                        text_design += string_2 % 'Categorie :' +' '+ string % i.categorie_id.get().name
+                        text_design += ' | '
+                        moule_count = 1
+                        for moule in i.list_moule_NIden():
+                            text_design += string_2 % 'moule'+ string_2 % str(moule_count)
+                            text_design += string % '('
+                            text_design += string_2 % 'Type : '
+                            text_design += string % moule.name_moule()+', '
+                            text_design += string_2 % 'Qte : '
+                            text_design += string % str(moule.qte) +', '
+
+                            layer_count = 1
+                            for layer in moule.list_composition():
+                                text_design += string_2 % 'Layer' + string_2 % str(layer_count) + string_2 % ' : '
+                                text_design += string % layer.name_goutcreme() + ', '
+                                if layer.imbibage_id:
+                                    text_design += string % layer.name_imbibage() + ', '
+                                if layer.coulis_id:
+                                    text_design += string % layer.name_coulis() + ', '
+                                layer_count += 1
+
+                            text_design += ") "
+                            moule_count += 1
+
+                            if moule.nbre_identique_count():
+                                for identique in moule.nbre_identique():
+                                    text_design +=  " | "
+                                    text_design += string_2 % 'Moule '+str(moule_count)
+                                    text_design += string % 'Layer identique aux layers du'
+                                    text_design += string_2 % 'moule' +str(moule_count - 1)
+                                    text_design += string % '('
+                                    text_design += string_2 % 'Type :'
+                                    text_design += string % identique.name_moule()
+                                    text_design += string_2 % 'Qte :'
+                                    text_design += string % identique.qte + ", "
+                                    moule_count += 1
+
+                        if i.impression and not i.pate:
+                            text_design += ' | '
+                            text_design += string % 'Impression'
+                        if i.pate and not i.impression:
+                            text_design += ' | '
+                            text_design += string % 'Pate'
+                        if i.pate and i.impression:
+                            text_design += ' | '
+                            text_design += string % 'Impression & Pate'
+
+                        text_design += ' | '
+                        text_design += string_2 % 'Observation :' + '' + string % i.observation
+
+                        text_qte = string % '['+ string % list_part[i.nbrPart]+ string % ']'
+                        text_montant = string % str(function.format_price(i.prix))
+
+
+                    if i.produit_id.get().type_produit == 2:
+                        text_design += string % i.produit_id.get().name +' - '+ string_2 % i.typeGateau_id.get().name +' '+string_2 % i.couleurRuban_id.get().name
+                        text_design += ' | '
+
+                        if i.emballage:
+                            text_design += string % 'Emballage |'
+                        else:
+                            text_design += string % 'Sans Emballage |'
+
+                        if i.impression and not i.pate:
+                            text_design += string % 'Impression' + ' | '
+                        if i.pate and not i.impression:
+                            text_design += string % 'Pate' + ' | '
+                        if i.pate and i.impression:
+                            text_design += string % 'Impression & Pate' + ' | '
+
+                        text_design += string_2 % 'Observation :' + '' + string % i.observation
+
+                        text_qte = string % i.qte
+                        text_montant = string % str(function.format_price(i.prix))
+
+
+                    if i.produit_id.get().type_produit == 3:
+                        text_design += string % i.produit_id.get().name +' - '+ string_2 % i.typeGateau_id.get().name
+                        text_design += ' | '
+
+
+                        for compos in i.list_composition():
+                            text_design += string_2 % 'Gout de creme : ' + string % compos.name_goutcreme()
+                            text_design += ' | '
+                            text_design += string_2 % 'Fourrage : ' + string % compos.name_fourage()
+
+                            if compos.coulis_id:
+                                text_design += ' | '
+                                text_design += string_2 % 'Coulis : ' + string % compos.name_coulis()
+
+                            if compos.imbibage_id:
+                                text_design += string_2 % 'Imbibage : ' + string % compos.name_imbibage()
+                                text_design += ' | '
+
+                            if compos.topping_id:
+                                text_design += ' | '
+                                text_design += string_2 % 'Topping : ' + string % compos.name_topping()
+
+                            if compos.couleur_cup_id:
+                                text_design += ' | '
+                                text_design += string_2 % 'Couleur Cup : ' + string % compos.name_couleur_cup()
+
+
+                        text_design += ' | '
+                        text_design += string_2 % 'Observation :' + '' + string % i.observation
+
+                        text_qte = string % i.qte
+                        text_montant = string % str(function.format_price(i.prix))
+
+
+
+                    design = Paragraph(text_design, styleN)
+                    qte = Paragraph(text_qte, styleN)
+                    montant = Paragraph(text_montant, styleN)
+                    current = [design, qte, montant]
+                    data.append(current)
+
+                tot = string % function.format_price(total)
+                data.append([Paragraph(string_2 % 'TOTAL', styleN), '' , Paragraph(tot, styleN)])
+                acco = string % function.format_price(accompte)
+                data.append([Paragraph(string_2 % 'Accompte', styleN), '', Paragraph(acco, styleN)])
+                reste = string % function.format_price(total_accompte)
+                data.append([Paragraph(string_2 % 'Reste a payer', styleN), '', Paragraph(reste, styleN)])
+
+                table = Table(data, colWidths=[10*cm, 5*cm, 5*cm])
+
+                table.setStyle(TableStyle([
+                                       ('BACKGROUND',(0,0),(-1,0),'#ffdcea'),
+                                       ('TEXTCOLOR', (0,0),(-1,0),'#ffffff'),
+                                       ('INNERGRID', (0,0), (-1,-1), 0.25, '#000000'),
+                                       ('BOX', (0,0), (-1,-1), 0.25, '#000000'),
+                                       ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+                                    ]))
+
+
+                table.wrapOn(p, width, height)
+                wt, ht = table.wrap(width, height)
+                table.drawOn(p, width - wt - 0.9*cm, height - ht - hi - 6*cm)
+
+
+
+                devis = 'La devise est le Franc CFA'
+                c = Paragraph(devis, style=style['Italic'])
+                wd, hd = c.wrapOn(p, width, ht)
+                c.drawOn(p, width - wd + 0.9*cm, bottomMargin + 3.5*cm)
+
+                image = ImageReader(url_for('static', filename='font-color-2.jpg', _external=True))
+                wi, hi = image.getSize()
+                p.drawImage(url_for('static', filename='font-color-2.jpg', _external=True), 0, bottomMargin - 1*cm, width=width, height=hi, preserveAspectRatio=False)
+
+
+                time_zones = pytz.timezone('Africa/Douala')
+                date_auto_nows = datetime.datetime.now(time_zones).strftime("%Y-%m-%d %H:%M:%S")
+                string = '<font name="Times-Italic" size="8">%s</font>'
+                devis = string % 'genere le '+ string % function.format_date(function.datetime_convert(date_auto_nows), '%d/%m/%Y %H:%M')
+                c = Paragraph(devis, style=style["Italic"])
+                wd, hd = c.wrapOn(p, width, ht)
+                c.drawOn(p, width - wd + 0.9*cm, bottomMargin)
+
+
+                styleBH = style["Italic"]
+                styleBH.alignment = TA_CENTER
+                devis = 'CREATIVE CAKE, marque de SO.INVEST Ets., BP 4219 Douala'
+                c = Paragraph(devis, styleBH)
+                wd, hd = c.wrapOn(p, width, ht)
+                c.drawOn(p, width - wd, bottomMargin * 4)
+
+                devis = 'Tel: 651221122 / 655353506 / 698987515'
+                c = Paragraph(devis, styleBH)
+                wd, hd = c.wrapOn(p, width, ht)
+                c.drawOn(p, width - wd, bottomMargin * 3)
+
+                devis = 'info@creative-cake-design.com / www.creative-cake-design.com'
+                c = Paragraph(devis, styleBH)
+                wd, hd = c.wrapOn(p, width, ht)
+                c.drawOn(p, width - wd, bottomMargin * 2)
+
+                devis = 'RC/DLA/2013/A/705 - P097800367635W'
+                c = Paragraph(devis, styleBH)
+                wd, hd = c.wrapOn(p, width, ht)
+                c.drawOn(p, width - wd, bottomMargin)
+
+                p.showPage()
+                p.save()
+                pdf_out = output.getvalue()
+
+
+                blob = PdfTable()
+                blob.archivoBlob = pdf_out
+                blob.commande_id = current_facture.key
+                blob.put()
+    return 'true'

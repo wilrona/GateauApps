@@ -16,6 +16,9 @@
             <nav class="navbar navbar-toolbar" role="navigation">
               <div class="container-fluid">
                 <div class="btn-toolbar" role="toolbar">
+                  <div class="btn-group pull-right">
+                    <a href="{{ url_for('commande.facturePDF', facture_id=id_commande) }}" class="btn btn-default" target="_blank">Telecharger le pdf</a>
+                  </div>
                   {% if current_user.has_roles([('super_admin', 'update_facture')]) %}
                   <div class="btn-group pull-right">
                     <a href="{{ url_for('commande.UpdateCommande', id_commande=id_commande) }}" class="btn btn-warning {% if not update %} disabled {% endif %}" >Modifier</a>

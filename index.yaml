@@ -48,6 +48,11 @@ indexes:
 
 - kind: Commande
   properties:
+  - name: dateCmd
+  - name: ref
+
+- kind: Commande
+  properties:
   - name: dateLiv
   - name: timeLiv
 

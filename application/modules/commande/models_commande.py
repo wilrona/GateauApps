@@ -27,6 +27,8 @@ class Commande(ndb.Model):
     verif_calendar = ndb.BooleanProperty(default=False)
     update = ndb.DateTimeProperty(auto_now=True)
     create = ndb.DateTimeProperty(auto_now_add=True)
+    mail_send = ndb.BooleanProperty(default=False)
+    mail_type = ndb.IntegerProperty(default=0)
 
     def produit_commande(self, verified=False):
 
@@ -47,6 +49,12 @@ class Commande(ndb.Model):
             Activite.commande == self.key
         )
         return all
+
+    def versement(self):
+        versement_cmd = Versement.query(
+            Versement.commande_id == self.key
+        ).order(-Versement.dateVers)
+        return versement_cmd
 
 
 class Versement(ndb.Model):
@@ -249,3 +257,9 @@ class Activite(ndb.Model):
     date = ndb.DateTimeProperty()
     user = ndb.KeyProperty(kind=Users)
     commande = ndb.KeyProperty(kind=Commande)
+
+
+class PdfTable(ndb.Model):
+    archivoBlob = ndb.BlobProperty()
+    commande_id = ndb.KeyProperty(kind=Commande)
+    date = ndb.DateTimeProperty(auto_now_add=True)
