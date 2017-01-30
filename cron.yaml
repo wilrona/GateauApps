@@ -16,3 +16,13 @@ cron:
 - description: Lier les events calendars avec les produits cres
   url: /commande/planning/add_event/auto
   schedule: every 1 hours
+
+
+- description: Creation des factures avant envoie
+  url: /commande/planning/facture/save
+  schedule: every 5 mins
+
+
+- description: Envoie des factures au client
+  url: /commande/planning/send_facture
+  schedule: every 7 mins

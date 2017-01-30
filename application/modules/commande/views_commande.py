@@ -2753,32 +2753,32 @@ def updateSable(id_commande, gateau_id=None):
 def correction():
     all_commande = Commande.query().order(Commande.dateCmd)
 
-    show = []
-
-
-    count = 1
+    # show = []
+    #
+    #
+    # count = 1
     for commande in all_commande:
-        try:
-            client = commande.user.get().name
-            year_cmd = commande.dateCmd.year
-            commande.ref = 'CC/'+str(year_cmd)+'/'+str(count)
-            commande.put()
-            count += 1
-        except AttributeError:
-            commande.key.delete()
+        # try:
+        #     client = commande.user.get().name
+        #     year_cmd = commande.dateCmd.year
+        #     commande.ref = 'CC/'+str(year_cmd)+'/'+str(count)
+        #     commande.put()
+        #     count += 1
+        # except AttributeError:
+        #     commande.key.delete()
         # try:
         #
         # except AttributeError
         # show.append((commande.user.get().name, commande.user))
 
-        # accompte = 0
-        # for versement in commande.versement():
-        #     accompte += versement.montant
-        #
-        # if commande.montant == accompte:
-        #     commande.mail_type = 1
-        # commande.mail_send = False
-        # commande.put()
+        accompte = 0
+        for versement in commande.versement():
+            accompte += versement.montant
+
+        if commande.montant == accompte:
+            commande.mail_type = 1
+        commande.mail_send = False
+        commande.put()
 
 
     # all_user = Users.query(
@@ -2858,7 +2858,7 @@ def facturePDF(facture_id):
     string = '<font name="Times-Italic" size="12">%s</font>'
     string_2 = '<font name="Times-Bold" size="12">%s</font>'
     email = string % current_facture.user.get().email
-    show_email = string_2 % ' Email : '+email
+    show_email = string_2 % ' Email : '+email.lower()
     c = Paragraph(show_email, style=style['Code'])
     wti_name, hti_name = c.wrapOn(p, width, height)
     c.drawOn(p, width - wti_name, topMargin - 2*cm)
@@ -2914,10 +2914,8 @@ def facturePDF(facture_id):
         montant = produit.prix
         total = total + montant
 
-    total_accompte = total
     accompte = 0
     for versement in current_facture.versement():
-        total_accompte = total - versement.montant
         accompte += versement.montant
 
 
@@ -2982,7 +2980,7 @@ def facturePDF(facture_id):
                         text_design += string_2 % 'moule' +str(moule_count - 1)
                         text_design += string % '('
                         text_design += string_2 % 'Type :'
-                        text_design += string % str(identique.name_moule())
+                        text_design += string % identique.name_moule()
                         text_design += string_2 % 'Qte :'
                         text_design += string % identique.qte + ", "
                         moule_count += 1
@@ -3071,7 +3069,8 @@ def facturePDF(facture_id):
     data.append([Paragraph(string_2 % 'TOTAL', styleN), '' , Paragraph(tot, styleN)])
     acco = string % function.format_price(accompte)
     data.append([Paragraph(string_2 % 'Accompte', styleN), '', Paragraph(acco, styleN)])
-    reste = string % function.format_price(total_accompte)
+    reste_payer = total - accompte
+    reste = string % function.format_price(reste_payer)
     data.append([Paragraph(string_2 % 'Reste a payer', styleN), '', Paragraph(reste, styleN)])
 
     table = Table(data, colWidths=[10*cm, 5*cm, 5*cm])
@@ -3136,16 +3135,16 @@ def facturePDF(facture_id):
     p.save()
     pdf_out = output.getvalue()
 
-    # if request.args.get('send'):
-    #     blob = PdfTable()
-    #     blob.archivoBlob = pdf_out
-    #     blob.commande_id = current_facture.key
-    #     blob.put()
-    #     return 'true'
-    # else:
-    output.close()
+    if request.args.get('send'):
+        blob = PdfTable()
+        blob.archivoBlob = pdf_out
+        blob.commande_id = current_facture.key
+        blob.put()
+        return 'true'
+    else:
+        output.close()
 
-    response = make_response(pdf_out)
-    response.headers["Content-Type"] = "application/pdf"
+        response = make_response(pdf_out)
+        response.headers["Content-Type"] = "application/pdf"
 
-    return response
+        return response
