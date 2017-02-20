@@ -1831,7 +1831,7 @@ def facture(id_commande):
     )
     
     update = False
-    if commande.dateLiv > datetime.date.today():
+    if commande.dateLiv >= datetime.date.today():
         update = True
 
     total = 0
