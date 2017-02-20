@@ -1930,7 +1930,7 @@ def facture_versement(id_commande):
         activite.action = 3
         activite.infos = 'Suppression realise de '+str(vers_del.montant)
         activite.user = user_curent.key
-        activite.date = function.datetime_convert(date_auto_nows)
+        activite.date = current_date
         activite.commande = commande.key
         activite.put()
 
@@ -1953,7 +1953,7 @@ def facture_versement(id_commande):
 
         vers = Versement()
         vers.montant = float(request.form['versement'])
-        vers.dateVers = function.date_convert(date_auto_nows)
+        vers.dateVers = current_date
         vers.commande_id = commande.key
         vers.put()
 

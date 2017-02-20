@@ -275,6 +275,7 @@ def password(user_id):
 
     return render_template('user/password.html', **locals())
 
+
 @prefix_param.route('/user/active/<int:user_id>',  methods=['GET', 'POST'])
 def active(user_id):
 
@@ -288,6 +289,7 @@ def active(user_id):
     users.put()
     flash('Enregistement effectue avec succes', 'success')
     return redirect(url_for('user_param.index'))
+
 
 @prefix_param.route('/user/pin/<int:user_id>',  methods=['GET', 'POST'])
 def random(user_id):

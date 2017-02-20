@@ -66,7 +66,7 @@ def index():
 @prefix.route('/edit',  methods=['GET', 'POST'])
 @prefix.route('/edit/<int:client_id>',  methods=['GET', 'POST'])
 @login_required
-@roles_required([('super_admin', 'gateau'), ['edit']])
+@roles_required([('super_admin', 'client'), ['edit']])
 def edit(client_id=None):
 
     from ..profil.models_profil import Profil, ProfilRole
