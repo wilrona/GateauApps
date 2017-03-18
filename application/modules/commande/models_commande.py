@@ -47,7 +47,7 @@ class Commande(ndb.Model):
     def activite(self):
         all = Activite.query(
             Activite.commande == self.key
-        )
+        ).order(Activite.date)
         return all
 
     def versement(self):
@@ -55,6 +55,34 @@ class Commande(ndb.Model):
             Versement.commande_id == self.key
         ).order(-Versement.dateVers)
         return versement_cmd
+
+    def montant_versment(self):
+
+        montant = 0
+
+        versement_cmd = Versement.query(
+            Versement.commande_id == self.key
+        ).order(-Versement.dateVers)
+
+        for vers in versement_cmd:
+            montant += vers.montant
+
+        return montant
+
+    def amount_fisrt_account(self):
+        montant = 0
+
+        versement_cmd = Versement.query(
+            Versement.commande_id == self.key
+        ).order(-Versement.dateVers)
+
+        for versement in versement_cmd:
+            if versement.dateVers == self.dateCmd:
+                montant = versement.montant
+                break
+        return montant
+
+
 
 
 class Versement(ndb.Model):

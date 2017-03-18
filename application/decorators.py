@@ -16,7 +16,10 @@ def login_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
         if not current_user.is_authenticated() or not session.get('user_id'):
-            return redirect(url_for('home.index'))
+            return redirect(url_for('user.logout'))
+
+        if not current_user.is_authenticated() and session.get('user_id'):
+            return redirect(url_for('user.logout'))
 
         if current_user.is_authenticated() and not current_user.is_active():
             flash('Votre compte est desactive. Contactez votre administrateur', 'danger')
@@ -33,7 +36,11 @@ def roles_required(required_roles, required_droits=None):
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated() or not session.get('user_id'):
                 flash('Connectez-vous SVP.', 'danger')
-                return redirect(url_for('home.index'))
+                return redirect(url_for('user.logout'))
+
+            if not current_user.is_authenticated() and session.get('user_id'):
+                flash('Connectez-vous SVP.', 'danger')
+                return redirect(url_for('user.logout'))
 
             # User must have the required roles
             if not current_user.has_roles(required_roles, required_droits):
@@ -44,4 +51,3 @@ def roles_required(required_roles, required_droits=None):
             return func(*args, **kwargs)
         return decorated_view
     return wrapper
-

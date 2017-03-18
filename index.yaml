@@ -10,6 +10,17 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Activite
+  properties:
+  - name: commande
+  - name: date
+
+- kind: Activite
+  properties:
+  - name: commande
+  - name: date
+    direction: desc
+
 - kind: Commande
   properties:
   - name: annule
@@ -42,6 +53,13 @@ indexes:
 - kind: Commande
   properties:
   - name: annule
+  - name: mail_type
+  - name: dateLiv
+  - name: timeLiv
+
+- kind: Commande
+  properties:
+  - name: annule
   - name: send
   - name: dateLiv
   - name: timeLiv
@@ -68,6 +86,12 @@ indexes:
     direction: desc
   - name: timeLiv
     direction: desc
+
+- kind: Commande
+  properties:
+  - name: mail_type
+  - name: dateLiv
+  - name: timeLiv
 
 - kind: Commande
   properties:

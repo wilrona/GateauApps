@@ -1,7 +1,10 @@
+# coding=utf-8
 __author__ = 'Ronald'
 
+# -*- coding: utf-8 -*-
+
 from ...modules import *
-from ..commande.models_commande import ProduitCommander, Commande, PdfTable
+from ..commande.models_commande import ProduitCommander, Commande, PdfTable, ndb
 
 
 # Flask-Cache (configured to use App Engine Memcache API)
@@ -448,6 +451,8 @@ def calendar(id_commande):
               }
             }
             events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
+            produit.eventID = events['id']
+            produit.put()
 
     return 'True'
 
@@ -515,6 +520,9 @@ def calendar_init():
                   }
                 }
                 events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
+
+                produit.eventID = events['id']
+                produit.put()
 
     return 'True'
 
@@ -608,7 +616,7 @@ def calendar_event():
                 break
 
         cmd_calendar = Commande.query(
-            Commande.verif_calendar == False
+            Commande.dateLiv > datetime.date.today()
         )
 
         list_produit = []
@@ -752,34 +760,122 @@ def calendar_event_delete(id_produit):
 @prefix_planning.route('/send_facture/<int:id_facture>')
 def send_facture_test(id_facture):
     from google.appengine.api import mail
+    import re
+    import requests
 
     commande = Commande.get_by_id(int(id_facture))
 
-    message = mail.EmailMessage()
+    if commande.user and commande.user.get().email is not None:
 
-    create = False
+        current = PdfTable.query(
+            PdfTable.commande_id == commande.key
+        ).get()
 
-    name = commande.user.get().name
-    date = function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
-    livraison = function.format_date(function.date_convert(commande.dateLiv), '%d/%m/%Y')+' '+function.format_date(function.time_convert(commande.timeLiv), '%H:%M')
-    theme = commande.theme
+        client = commande.user.get().email
+        client = client.lower()
+        match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', client)
 
-    template = render_template('commande/planning/email_facture.html', **locals())
-    message.html = template
+        if match and not current:
 
-    message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
-    message.subject = 'Test Information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
-    message.to = 'celine.guemnietafo@gmail.com'
+            execute = requests.get('http://creative-cake.appspot.com/commande/facture/pdf/'+str(commande.key.id())+'?send=1').content
 
-    pdf_file = PdfTable.query(
-        PdfTable.commande_id == commande.key
-    ).get()
+            if (commande.mail_type == 0 or commande.mail_type == 2) and execute:
+                message = mail.EmailMessage()
 
-    message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob)]
+                create = True
+                name = commande.user.get().name
+                date = function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                livraison = function.format_date(function.date_convert(commande.dateLiv), '%d/%m/%Y')+' '+function.format_date(function.time_convert(commande.timeLiv), '%H:%M')
+                theme = commande.theme
 
+                template = render_template('commande/planning/email_facture.html', **locals())
+                message.html = template
+
+                message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
+                if commande.mail_type == 2:
+                    message.subject = 'Des modifications d\'information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                else:
+                    message.subject = 'Information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+
+                if request.args.get('mail') and re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', request.args.get('mail').lower()):
+                    message.to = request.args.get('mail').lower()
+                else:
+                    message.to = client
+
+                document = url_for('static', filename='Conditions-Generales-de-vente-CCD.pdf', _external=True)
+
+                pdf_file = PdfTable.query(
+                    PdfTable.commande_id == commande.key
+                ).get()
+
+                message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob),('Condition-vente.pdf', document)]
+
+                send = message.send()
+
+                # commande.mail_send = True
+                commande.put()
+
+                pdf_file.key.delete()
+
+            if commande.mail_type == 1 and execute:
+                message = mail.EmailMessage()
+
+                create = False
+                name = commande.user.get().name
+                date = function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                livraison = function.format_date(function.date_convert(commande.dateLiv), '%d/%m/%Y')+' '+function.format_date(function.time_convert(commande.timeLiv), '%H:%M')
+                theme = commande.theme
+
+                template = render_template('commande/planning/email_facture.html', **locals())
+                message.html = template
+
+
+                message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
+                message.subject = 'Solde de votre commande '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+
+                if request.args.get('mail') and re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', request.args.get('mail').lower()):
+                    message.to = request.args.get('mail').lower()
+                else:
+                    message.to = client
+
+                pdf_file = PdfTable.query(
+                    PdfTable.commande_id == commande.key
+                ).get()
+
+                message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob)]
+
+                send = message.send()
+
+                # commande.mail_send = True
+                commande.put()
+
+                pdf_file.key.delete()
+
+    # message = mail.EmailMessage()
+    #
+    # create = False
+    #
+    # name = commande.user.get().name
+    # date = function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+    # livraison = function.format_date(function.date_convert(commande.dateLiv), '%d/%m/%Y')+' '+function.format_date(function.time_convert(commande.timeLiv), '%H:%M')
+    # theme = commande.theme
+    #
+    # template = render_template('commande/planning/email_facture.html', **locals())
+    # message.html = template
+    #
+    # message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
+    # message.subject = 'Test Information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+    # message.to = 'celine.guemnietafo@gmail.com'
+    #
+    # pdf_file = PdfTable.query(
+    #     PdfTable.commande_id == commande.key
+    # ).get()
+    #
     # message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob)]
-
-    send = message.send()
+    #
+    # # message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob)]
+    #
+    # send = message.send()
 
     return 'TRUE'
 
@@ -804,7 +900,7 @@ def send_facture():
             client = client.lower()
             match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', client)
 
-            if commande.mail_type == 0 and match:
+            if (commande.mail_type == 0 or commande.mail_type == 2) and match:
                 message = mail.EmailMessage()
 
                 create = True
@@ -817,7 +913,10 @@ def send_facture():
                 message.html = template
 
                 message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
-                message.subject = 'Information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                if commande.mail_type == 2:
+                    message.subject = 'Des modifications d\'information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+                else:
+                    message.subject = 'Information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
                 message.to = client
 
                 document = url_for('static', filename='Conditions-Generales-de-vente-CCD.pdf', _external=True)
@@ -865,6 +964,9 @@ def send_facture():
 
                 pdf_file.key.delete()
 
+
+
+
     return 'True'
 
 
@@ -889,6 +991,130 @@ def facturePDF_save():
             client = client.lower()
             match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', client)
             # current_facture = Commande.get_by_id(facture_id)
-            if match and (current_facture.mail_type == 0 or current_facture.mail_type == 1) and not current:
+            if match and not current:
                 execute = requests.get('http://creative-cake.appspot.com/commande/facture/pdf/'+str(current_facture.key.id())+'?send=1').content
     return 'true'
+
+
+@prefix_planning.route('/send_solde_last_week/<all>')
+@prefix_planning.route('/send_solde_last_week')
+def send_solde_last_week(all=None):
+
+    from google.appengine.api import mail
+
+    DayL = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche']
+    Monthly = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout','Sept', 'Oct', 'Nov', 'Dec']
+
+    all_commande = Commande.query(
+        Commande.mail_type != 1,
+        Commande.annule == False
+    ).order(Commande.mail_type, Commande.dateLiv, Commande.timeLiv)
+
+    commande_to_send = []
+
+    for commande in all_commande:
+
+        day = commande.dateLiv.strftime('%d/%m/%Y')
+        dt = datetime.datetime.strptime(day, '%d/%m/%Y')
+
+        start = dt - timedelta(days=dt.weekday())
+
+        current_day = datetime.date.today().strftime('%d/%m/%Y')
+        current_dt = datetime.datetime.strptime(current_day, '%d/%m/%Y')
+
+        current_start = current_dt - timedelta(days=(current_dt.weekday() + 7))
+
+        montant = commande.montant
+
+        montant_versement = commande.montant_versment()
+
+        montant_restant = montant - montant_versement
+
+        if start == current_start and montant_restant > 0:
+            commande_to_send.append(commande)
+
+
+    if commande_to_send:
+
+        message = mail.EmailMessage()
+
+        passe = True
+
+        current_day = datetime.date.today().strftime('%d/%m/%Y')
+        current_dt = datetime.datetime.strptime(current_day, '%d/%m/%Y')
+
+        current_start = current_dt - timedelta(days=(current_dt.weekday() + 7))
+        current_end = current_start + timedelta(days=6)
+
+        template = render_template('commande/planning/email_commande_solde.html', **locals())
+
+        if not all:
+            message.html = template
+
+            message.sender = 'Commande Creative Cake Apps <no_reply@creative-cake.appspotmail.com>'
+            message.subject = 'Commande non solde de la semaine du '+ function.format_date(function.datetime_convert(current_start), '%d/%m/%Y')+' au '+function.format_date(function.datetime_convert(current_end), '%d/%m/%Y')
+            # message.to = 'wilrona@gmail.com'
+            message.to = 'celine.guemnietafo@gmail.com'
+
+            send = message.send()
+        else:
+            return template
+
+    return str(all)
+
+
+
+
+@prefix_planning.route('/send_solde/<all>')
+@prefix_planning.route('/send_solde')
+def send_solde(all=None):
+
+    from google.appengine.api import mail
+
+    DayL = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche']
+    Monthly = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout','Sept', 'Oct', 'Nov', 'Dec']
+
+    all_commande = Commande.query(
+        Commande.mail_type != 1,
+        Commande.annule == False
+    ).order(Commande.mail_type, Commande.dateLiv, Commande.timeLiv)
+
+    commande_to_send = []
+
+    for commande in all_commande:
+
+        current_day = datetime.date.today().strftime('%d/%m/%Y')
+        current_dt = datetime.datetime.strptime(current_day, '%d/%m/%Y')
+
+        current_start = current_dt - timedelta(days=(current_dt.weekday()))
+
+        montant = commande.montant
+
+        montant_versement = commande.montant_versment()
+
+        montant_restant = montant - montant_versement
+
+        if commande.dateLiv < function.date_convert(current_start) and  montant_restant > 0:
+            commande_to_send.append(commande)
+
+    if commande_to_send:
+
+        message = mail.EmailMessage()
+
+        passe = False
+
+        template = render_template('commande/planning/email_commande_solde.html', **locals())
+
+        if not all:
+            message.html = template
+
+            message.sender = 'Commande Creative Cake Apps <no_reply@creative-cake.appspotmail.com>'
+            message.subject = 'Total des commandes non solde a nos jours'
+            # message.to = 'wilrona@gmail.com'
+            message.to = 'celine.guemnietafo@gmail.com'
+
+            send = message.send()
+        else:
+            return template
+
+    return 'True'
