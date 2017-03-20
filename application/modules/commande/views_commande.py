@@ -1807,10 +1807,10 @@ def commande_terminer():
     if dateLivar == end:
         send = requests.get("http://creative-cake.appspot.com/commande/planning/day/rappel").content
 
-    try:
-        calendrier = requests.get("http://creative-cake.appspot.com/commande/planning/add_calendar/"+str(commande.id())).content
-    except requests.exceptions.ConnectionError as e:
-        pass
+    # try:
+    #     calendrier = requests.get("http://creative-cake.appspot.com/commande/planning/add_calendar/"+str(commande.id())).content
+    # except requests.exceptions.ConnectionError as e:
+    #     pass
 
 
     session['commande'] = []
@@ -1875,10 +1875,10 @@ def facture_annuler(id_commande):
             ProduitCommander.commande_id == commande.key
         )
         for produit in produit_commande:
-            try:
-                calendrier = requests.get("http://creative-cake.appspot.com/commande/planning/delete_event/"+str(produit.key.id())).content
-            except requests.exceptions.ConnectionError as e:
-                pass
+            # try:
+            #     requests.get("http://creative-cake.appspot.com/commande/planning/delete_event/"+str(produit.key.id())).content
+            # except requests.exceptions.ConnectionError as e:
+            #     pass
             produit.annule = False
             produit.put()
         activite.infos = 'Relance de la commande'
@@ -1891,7 +1891,7 @@ def facture_annuler(id_commande):
         )
         for produit in produit_commande:
             try:
-                calendrier = requests.get("http://creative-cake.appspot.com/commande/planning/delete_event/"+str(produit.key.id())).content
+                requests.get("http://creative-cake.appspot.com/commande/planning/delete_event/"+str(produit.key.id())).content
             except requests.exceptions.ConnectionError as e:
                 pass
             produit.annule = True
@@ -2153,11 +2153,11 @@ def UpdateCommande(id_commande):
             commande.put()
 
             if cli_dif or liv_dif or tim_dif or the_dif:
-                import requests
-                try:
-                    calendrier = requests.get("http://creative-cake.appspot.com/commande/planning/update_calendar/"+str(commande.key.id())).content
-                except requests.exceptions.ConnectionError as e:
-                    pass
+                # import requests
+                # try:
+                #     calendrier = requests.get("http://creative-cake.appspot.com/commande/planning/update_calendar/"+str(commande.key.id())).content
+                # except requests.exceptions.ConnectionError as e:
+                #     pass
 
                 activite.infos = "Modification des informations de l'evenement"
                 activite.user = user_curent.key

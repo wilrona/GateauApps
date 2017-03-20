@@ -390,85 +390,36 @@ def email_day_rappel():
     return 'True'
 
 
-@prefix_planning.route('/add_calendar/<int:id_commande>')
-def calendar(id_commande):
-
-    from ..agenda.view_agenda import Calandar
-    calendar = Calandar.query().get()
-
-    if calendar and calendar.agendaID:
-        credentials = client.OAuth2Credentials.from_json(calendar.token)
-        http_auth = credentials.authorize(Http())
-        service = build('calendar', 'v3', http=http_auth)
-
-        current_commande = Commande.get_by_id(id_commande)
-
-        start = datetime.datetime.combine(current_commande.dateLiv, current_commande.timeLiv)
-        start_to_end = start
-        start = start.strftime('%Y-%m-%dT%H:%M:%S')
-
-        end = start_to_end + timedelta(minutes=15)
-        end = end.strftime('%Y-%m-%dT%H:%M:%S')
-
-        for produit in current_commande.produit_commande(verified=True):
-
-            prod = 'Cupcake'
-            part = produit.qte
-            if produit.produit_id.get().type_produit == 1:
-                prod = 'Gateau'
-                list_part = global_part
-                part = list_part[produit.nbrPart]
-
-            if produit.produit_id.get().type_produit == 2:
-                prod = 'Sable'
-                part = produit.qte
-
-            summary = prod+' de '+current_commande.user.get().name+' de la commande '+current_commande.ref
-
-            description = 'Theme : '+current_commande.theme+'\n'
-            description += 'Evenement : '+current_commande.event_id.get().name+'\n'
-            description += 'Nombre de part/quantite : '+str(part)+'\n'
-
-            if produit.produit_id.get().type_produit == 1:
-                description += 'Categorie : '+produit.categorie_id.get().name+'\n'
-                description += 'Moule : '
-                for moule in produit.list_moule():
-                    description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
-
-            event = {
-              'summary': summary,
-              'description': description,
-              'start': {
-                'dateTime': start,
-                'timeZone': 'Africa/Lagos',
-              },
-              'end': {
-                'dateTime': end,
-                'timeZone': 'Africa/Lagos',
-              },
-              'reminders': {
-                'useDefault': True
-              }
-            }
-            events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
-            produit.eventID = events['id']
-            produit.put()
-
-    return 'True'
-
-
 @prefix_planning.route('/calendar_init')
 def calendar_init():
 
     from ..agenda.view_agenda import Calandar
     calendar = Calandar.query().get()
 
+    page_token = None
+    list_event = []
+    list_event2 = []
+
     if calendar and calendar.agendaID:
         credentials = client.OAuth2Credentials.from_json(calendar.token)
         http_auth = credentials.authorize(Http())
         service = build('calendar', 'v3', http=http_auth)
 
-        all_commande = Commande.query()
+
+        while True:
+            events = service.events().list(calendarId=calendar.agendaID, pageToken=page_token).execute()
+            for event in events['items']:
+                    list_event.append(event['id'])
+            page_token = events.get('nextPageToken')
+            if not page_token:
+                break
+
+        # for event in list_event:
+        #     service.events().delete(calendarId=calendar.agendaID, eventId=event).execute()
+
+        all_commande = Commande.query(
+            Commande.annule == False
+        )
 
         for current_commande in all_commande:
 
@@ -481,48 +432,50 @@ def calendar_init():
 
             for produit in current_commande.produit_commande(verified=True):
 
-                prod = 'Cupcake'
-                part = produit.qte
-                if produit.produit_id.get().type_produit == 1:
-                    prod = 'Gateau'
-                    list_part = global_part
-                    part = list_part[produit.nbrPart]
+                if produit.eventID not in list_event:
 
-                if produit.produit_id.get().type_produit == 2:
-                    prod = 'Sable'
+                    prod = 'Cupcake'
                     part = produit.qte
+                    if produit.produit_id.get().type_produit == 1:
+                        prod = 'Gateau'
+                        list_part = global_part
+                        part = list_part[produit.nbrPart]
 
-                summary = prod+' de '+current_commande.user.get().name+' de la commande '+current_commande.ref
+                    if produit.produit_id.get().type_produit == 2:
+                        prod = 'Sable'
+                        part = produit.qte
 
-                description = 'Theme : '+current_commande.theme+'\n'
-                description += 'Evenement : '+current_commande.event_id.get().name+'\n'
-                description += 'Nombre de part/quantite : '+str(part)+'\n'
+                    summary = prod+' de '+current_commande.user.get().name+' de la commande '+current_commande.ref
 
-                if produit.produit_id.get().type_produit == 1:
-                    description += 'Categorie : '+produit.categorie_id.get().name+'\n'
-                    description += 'Moule : '
-                    for moule in produit.list_moule():
-                        description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+                    description = 'Theme : '+current_commande.theme+'\n'
+                    description += 'Evenement : '+current_commande.event_id.get().name+'\n'
+                    description += 'Nombre de part/quantite : '+str(part)+'\n'
 
-                event = {
-                  'summary': summary,
-                  'description': description,
-                  'start': {
-                    'dateTime': start,
-                    'timeZone': 'Africa/Lagos',
-                  },
-                  'end': {
-                    'dateTime': end,
-                    'timeZone': 'Africa/Lagos',
-                  },
-                  'reminders': {
-                    'useDefault': True
-                  }
-                }
-                events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
+                    if produit.produit_id.get().type_produit == 1:
+                        description += 'Categorie : '+produit.categorie_id.get().name+'\n'
+                        description += 'Moule : '
+                        for moule in produit.list_moule():
+                            description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
 
-                produit.eventID = events['id']
-                produit.put()
+                    event = {
+                      'summary': summary,
+                      'description': description,
+                      'start': {
+                        'dateTime': start,
+                        'timeZone': 'Africa/Lagos',
+                      },
+                      'end': {
+                        'dateTime': end,
+                        'timeZone': 'Africa/Lagos',
+                      },
+                      'reminders': {
+                        'useDefault': True
+                      }
+                    }
+                    events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
+
+                    produit.eventID = events['id']
+                    produit.put()
 
     return 'True'
 
@@ -586,6 +539,75 @@ def calendar_update(id_commande):
 
     return 'True'
 
+@prefix_planning.route('/add_calendar/<int:id_commande>')
+def calendar(id_commande):
+
+    from ..agenda.view_agenda import Calandar
+    calendar = Calandar.query().get()
+
+    if calendar and calendar.agendaID:
+        credentials = client.OAuth2Credentials.from_json(calendar.token)
+        http_auth = credentials.authorize(Http())
+        service = build('calendar', 'v3', http=http_auth)
+
+
+        current_commande = Commande.get_by_id(id_commande)
+
+        start = datetime.datetime.combine(current_commande.dateLiv, current_commande.timeLiv)
+        start_to_end = start
+        start = start.strftime('%Y-%m-%dT%H:%M:%S')
+
+        end = start_to_end + timedelta(minutes=15)
+        end = end.strftime('%Y-%m-%dT%H:%M:%S')
+
+        for produit in current_commande.produit_commande(verified=True):
+
+            prod = 'Cupcake'
+            part = produit.qte
+            if produit.produit_id.get().type_produit == 1:
+                prod = 'Gateau'
+                list_part = global_part
+                part = list_part[produit.nbrPart]
+
+            if produit.produit_id.get().type_produit == 2:
+                prod = 'Sable'
+                part = produit.qte
+
+            summary = prod+' de '+current_commande.user.get().name+' de la commande '+current_commande.ref
+
+            description = 'Theme : '+current_commande.theme+'\n'
+            description += 'Evenement : '+current_commande.event_id.get().name+'\n'
+            description += 'Nombre de part/quantite : '+str(part)+'\n'
+
+            if produit.produit_id.get().type_produit == 1:
+                description += 'Categorie : '+produit.categorie_id.get().name+'\n'
+                description += 'Moule : '
+                for moule in produit.list_moule():
+                    description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+
+            event = {
+                'summary': summary,
+                'description': description,
+                'start': {
+                    'dateTime': start,
+                    'timeZone': 'Africa/Lagos',
+                },
+                'end': {
+                    'dateTime': end,
+                    'timeZone': 'Africa/Lagos',
+                },
+                'reminders': {
+                    'useDefault': True
+                }
+            }
+            events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
+            produit.eventID = events['id']
+            produit.put()
+
+    return 'True'
+
+
+
 @prefix_planning.route('/add_event/auto')
 def calendar_event():
 
@@ -616,12 +638,13 @@ def calendar_event():
                 break
 
         cmd_calendar = Commande.query(
-            Commande.dateLiv > datetime.date.today()
+            Commande.dateLiv >= datetime.date.today(),
+            Commande.annule == False
         )
 
         list_produit = []
         for cmd in cmd_calendar:
-            exist = False
+            # exist = False
             for produit in cmd.produit_commande(verified=True):
                 product = {}
                 prod = 'Cupcake'
@@ -633,37 +656,37 @@ def calendar_event():
                 product['start'] = datetime.datetime.combine(cmd.dateLiv, cmd.timeLiv)
                 product['id'] = produit.key.id()
                 list_produit.append(product)
-                exist = True
-            if exist:
-                cmd.verif_calendar = True
-                cmd.put()
+                # exist = True
+            # if exist:
+            #     cmd.verif_calendar = True
+            #     cmd.put()
 
         for list_prod in list_produit:
-            for list_ev in list_event:
-                if list_ev['summary'] == list_prod['summary'] and list_ev['start'] == list_prod['start']:
-                    produ = ProduitCommander.get_by_id(int(list_prod['id']))
-                    if not produ.eventID:
-                        produ.eventID = list_ev['id']
-                        produ.put()
-                    else:
 
-                        start = datetime.datetime.combine(produ.commande_id.get().dateLiv, produ.commande_id.get().timeLiv)
-                        start_to_end = start
-                        start = start.strftime('%Y-%m-%dT%H:%M:%S')
+            produ = ProduitCommander.get_by_id(int(list_prod['id']))
 
-                        end = start_to_end + timedelta(minutes=15)
-                        end = end.strftime('%Y-%m-%dT%H:%M:%S')
+            start = datetime.datetime.combine(produ.commande_id.get().dateLiv, produ.commande_id.get().timeLiv)
+            start_to_end = start
+            start = start.strftime('%Y-%m-%dT%H:%M:%S')
+
+            end = start_to_end + timedelta(minutes=15)
+            end = end.strftime('%Y-%m-%dT%H:%M:%S')
+
+            if produ.eventID:
+
+                for list_ev in list_event:
+                    if list_ev['id'] == produ.eventID and list_ev['start'] != list_prod['start']:
 
                         prod = 'Cupcake'
-                        part = produit.qte
-                        if produit.produit_id.get().type_produit == 1:
+                        part = produ.qte
+                        if produ.produit_id.get().type_produit == 1:
                             prod = 'Gateau'
                             list_part = global_part
-                            part = list_part[produit.nbrPart]
+                            part = list_part[produ.nbrPart]
 
-                        if produit.produit_id.get().type_produit == 2:
+                        if produ.produit_id.get().type_produit == 2:
                             prod = 'Sable'
-                            part = produit.qte
+                            part = produ.qte
 
                         summary = prod+' de '+produ.commande_id.get().user.get().name+' de la commande '+produ.commande_id.get().ref
 
@@ -671,13 +694,13 @@ def calendar_event():
                         description += 'Evenement : '+produ.commande_id.get().event_id.get().name+'\n'
                         description += 'Nombre de part/quantite : '+str(part)+'\n'
 
-                        if produit.produit_id.get().type_produit == 1:
-                            description += 'Categorie : '+produit.categorie_id.get().name+'\n'
+                        if produ.produit_id.get().type_produit == 1:
+                            description += 'Categorie : '+produ.categorie_id.get().name+'\n'
                             description += 'Moule : '
-                            for moule in produit.list_moule():
+                            for moule in produ.list_moule():
                                 description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
 
-                        event = service.events().get(calendarId=calendar.agendaID, eventId=produit.eventID).execute()
+                        event = service.events().get(calendarId=calendar.agendaID, eventId=produ.eventID).execute()
                         event['summary'] = summary
                         event['description'] = description
                         event['start']['dateTime'] = start
@@ -685,7 +708,53 @@ def calendar_event():
 
                         updated_event = service.events().update(calendarId=calendar.agendaID, eventId=event['id'], body=event).execute()
 
-    return 'True'
+            else:
+
+                prod = 'Cupcake'
+                part = produ.qte
+                if produ.produit_id.get().type_produit == 1:
+                    prod = 'Gateau'
+                    list_part = global_part
+                    part = list_part[produ.nbrPart]
+
+                if produ.produit_id.get().type_produit == 2:
+                    prod = 'Sable'
+                    part = produ.qte
+
+                summary = prod+' de '+produ.commande_id.get().user.get().name+' de la commande '+produ.commande_id.get().ref
+
+                description = 'Theme : '+produ.commande_id.get().theme+'\n'
+                description += 'Evenement : '+produ.commande_id.get().event_id.get().name+'\n'
+                description += 'Nombre de part/quantite : '+str(part)+'\n'
+
+                if produ.produit_id.get().type_produit == 1:
+                    description += 'Categorie : '+produ.categorie_id.get().name+'\n'
+                    description += 'Moule : '
+                    for moule in produ.list_moule():
+                        description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+
+                event = {
+                    'summary': summary,
+                    'description': description,
+                    'start': {
+                        'dateTime': start,
+                        'timeZone': 'Africa/Lagos',
+                    },
+                    'end': {
+                        'dateTime': end,
+                        'timeZone': 'Africa/Lagos',
+                    },
+                    'reminders': {
+                        'useDefault': True
+                    }
+                }
+                events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
+                produ.eventID = events['id']
+                produ.put()
+
+
+    return 'TRUE'
+
 
 
 @prefix_planning.route('/delete_event/<int:id_produit>')
@@ -707,53 +776,53 @@ def calendar_event_delete(id_produit):
             service.events().delete(calendarId=calendar.agendaID, eventId=produit.eventID).execute()
             produit.eventID = None
             produit.put()
-        else:
-            start = datetime.datetime.combine(produit.commande_id.get().dateLiv, produit.commande_id.get().timeLiv)
-            start_to_end = start
-            start = start.strftime('%Y-%m-%dT%H:%M:%S')
-
-            end = start_to_end + timedelta(minutes=15)
-            end = end.strftime('%Y-%m-%dT%H:%M:%S')
-
-            prod = 'Cupcake'
-            part = produit.qte
-            if produit.produit_id.get().type_produit == 1:
-                prod = 'Gateau'
-                list_part = global_part
-                part = list_part[produit.nbrPart]
-
-            if produit.produit_id.get().type_produit == 2:
-                prod = 'Sable'
-                part = produit.qte
-
-            summary = prod+' de '+produit.commande_id.get().user.get().name+' de la commande '+produit.commande_id.get().ref
-
-            description = 'Theme : '+produit.commande_id.get().theme+'\n'
-            description += 'Evenement : '+produit.commande_id.get().event_id.get().name+'\n'
-            description += 'Nombre de part/quantite : '+str(part)+'\n'
-
-            if produit.produit_id.get().type_produit == 1:
-                description += 'Categorie : '+produit.categorie_id.get().name+'\n'
-                description += 'Moule : '
-                for moule in produit.list_moule():
-                    description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
-
-            event = {
-              'summary': summary,
-              'description': description,
-              'start': {
-                'dateTime': start,
-                'timeZone': 'Africa/Lagos',
-              },
-              'end': {
-                'dateTime': end,
-                'timeZone': 'Africa/Lagos',
-              },
-              'reminders': {
-                'useDefault': True
-              }
-            }
-            events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
+        # else:
+        #     start = datetime.datetime.combine(produit.commande_id.get().dateLiv, produit.commande_id.get().timeLiv)
+        #     start_to_end = start
+        #     start = start.strftime('%Y-%m-%dT%H:%M:%S')
+        #
+        #     end = start_to_end + timedelta(minutes=15)
+        #     end = end.strftime('%Y-%m-%dT%H:%M:%S')
+        #
+        #     prod = 'Cupcake'
+        #     part = produit.qte
+        #     if produit.produit_id.get().type_produit == 1:
+        #         prod = 'Gateau'
+        #         list_part = global_part
+        #         part = list_part[produit.nbrPart]
+        #
+        #     if produit.produit_id.get().type_produit == 2:
+        #         prod = 'Sable'
+        #         part = produit.qte
+        #
+        #     summary = prod+' de '+produit.commande_id.get().user.get().name+' de la commande '+produit.commande_id.get().ref
+        #
+        #     description = 'Theme : '+produit.commande_id.get().theme+'\n'
+        #     description += 'Evenement : '+produit.commande_id.get().event_id.get().name+'\n'
+        #     description += 'Nombre de part/quantite : '+str(part)+'\n'
+        #
+        #     if produit.produit_id.get().type_produit == 1:
+        #         description += 'Categorie : '+produit.categorie_id.get().name+'\n'
+        #         description += 'Moule : '
+        #         for moule in produit.list_moule():
+        #             description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+        #
+        #     event = {
+        #       'summary': summary,
+        #       'description': description,
+        #       'start': {
+        #         'dateTime': start,
+        #         'timeZone': 'Africa/Lagos',
+        #       },
+        #       'end': {
+        #         'dateTime': end,
+        #         'timeZone': 'Africa/Lagos',
+        #       },
+        #       'reminders': {
+        #         'useDefault': True
+        #       }
+        #     }
+        #     events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
 
     return 'True'
 
