@@ -176,3 +176,10 @@ body {
 .custom_input:focus{
     outline: none;
 }
+
+
+.panel-primary > .panel-footer {
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #337ab7;
+}

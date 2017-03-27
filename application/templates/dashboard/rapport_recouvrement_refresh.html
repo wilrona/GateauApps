@@ -1,0 +1,57 @@
+
+<div id="load" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3); display: none;    color: #fff;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20;">Chargement</div>
+<table class="table table-condensed">
+    <thead>
+    <tr>
+        <th width="15%">Reference</th>
+        <th width="15%">Client</th>
+        <th width="15%">Montant</th>
+        <th width="15%">Acompte</th>
+        <th width="15%">Reste</th>
+        <th width="10%">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for data in datas %}
+        {% if (data.montant - data.montant_versment()) > 0 %}
+            <tr>
+                <td>{{ data.ref }}</td>
+                <td>{{ data.user.get().name }}</td>
+                <td>{{ data.montant|format_price() }}</td>
+                <td>{{ data.montant_versment()|format_price() }}</td>
+                <td>{{ (data.montant - data.montant_versment())|format_price() }}</td>
+                <td>
+                    {% if  current_user.has_roles([('super_admin', 'facture_commande')]) %}
+                        <a href="{{ url_for('commande.facture', id_commande=data.key.id()) }}" class="btn btn-link btn-xs" target="_blank">Facture</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endif %}
+    {% else %}
+        <tr>
+            <td colspan="6">
+                <h4 class="text-center">Aucune information</h4>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title text-center">Un recouvrement de  : {{ (total_montant - total_versment)|format_price() }}</h3>
+    </div>
+</div>
+
+
+

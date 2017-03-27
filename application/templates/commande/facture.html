@@ -268,13 +268,13 @@
                                          <tr>
                                              <td></td>
                                              <td class="text-right"><strong>Accompte</strong></td>
-                                             <td class="text-center"> <strong>{{ accompte|format_price() }} FCFA</strong>  </td>
+                                             <td class="text-center"> <strong>{{ versement|format_price() }} FCFA</strong>  </td>
                                              <td></td>
                                          </tr>
                                          <tr>
                                              <td></td>
                                              <td class="text-right"><strong>Reste à payer</strong></td>
-                                             <td class="text-center"> <strong>{{ total_accompte|format_price() }} FCFA</strong> </td>
+                                             <td class="text-center"> <strong>{{ (total - versement)|format_price() }} FCFA</strong> </td>
                                              <td></td>
                                          </tr>
                                      </tfooter>

@@ -7,7 +7,7 @@ from ..profil.models_profil import Profil
 
 class Users(ndb.Model):
 
-    date_create = ndb.DateTimeProperty()
+    date_create = ndb.DateTimeProperty(auto_now=True)
     login = ndb.StringProperty()
     password = ndb.StringProperty()
 

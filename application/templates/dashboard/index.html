@@ -5,111 +5,118 @@
 
 {% block layout_content %}
 
+    <div class="col-lg-12">
+
+        <div class="page-header">
+            <h1>Statistique du mois</h1>
+        </div>
+
+    </div>
+
     <div class="row">
+
         <div class="col-lg-4 text-center">
-            <div class="placeholder bg-success">
-                <span >{{ commande_encours }}</span>
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <span class="lead">{{ montant_commande|format_price() }}</span>
+                </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Montant des commandes</h3>
+                </div>
             </div>
-            <h3>Commandes en cours</h3>
         </div>
-        <div class=" col-lg-4 text-center">
-            <div class="placeholder bg-danger">
-                <span >{{ client }}</span>
+        <div class="col-lg-4 text-center">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <span class="lead">{{ total_cmd }}</span>
+                </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Total des commandes</h3>
+                </div>
             </div>
-            <h3>Clients</h3>
         </div>
-        <div class=" col-lg-4 text-center">
-            <div class="placeholder bg-info">
-                <span >{{ gateaux }}</span>
+        <div class="col-lg-4 text-center">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <span class="lead">{{ nbr_client }}</span>
+                </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Clients</h3>
+                </div>
             </div>
-            <h3>Gateaux</h3>
         </div>
+        <div class="col-lg-4 text-center">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <span class="lead">{{ montant_livraison|format_price() }}</span>
+                </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Montant des livraisons</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 text-center">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <span class="lead">{{ cmd_day_next }}</span>
+                </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Livraison à venir</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 text-center">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <span class="lead">{{ cmd_day }}</span>
+                </div>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Livraison du jour</h3>
+                </div>
+            </div>
+        </div>
+
     </div>
 <hr/>
 <div class="row">
-    <div class="col-lg-7">
-        <div class="panel panel-default">
+    <div class="col-lg-6">
+        <div class="panel panel-primary">
             <div class="panel-heading">
-                <h4>Listes des commandes en cours</h4>
+                <h4>Total recouvrement du mois</h4>
             </div>
-            <div class="" style="height: 338px; overflow-y: auto">
-                <table class="table table-condensed">
-                <thead>
+            <table class="table">
+                <tbody>
                 <tr>
-                    <th width="30%">Produit</th>
-                    <th width="10%" class="text-center">Qte</th>
-                    <th width="30%" class="text-center">Date livr.</th>
-                    <th width="10%"></th>
+                    <td>Montant des livraisons</td>
+                    <td>{{ montant_livraison|format_price() }}</td>
                 </tr>
-                </thead>
-.           <tbody>
-                    {% for data in datas %}
-                      <tr {% if data.livre %} class="info" {% else %} {% if data.annule %} class="active" {% endif %} {% endif %}>
-                        <td>{{ data.gateau_id.get().name }}</td>
-                        <td class="text-center">{{ data.qte }}</td>
-                        <td class="text-center">{{ data.date_liv|format_date('%d/%m/%Y') }} <br/> {{ data.heure_liv }}</td>
-                        <td>
-                            <a href="{{ url_for('commande.details', detail_id=data.key.id()) }}" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal" data-backdrop="static">Détails</a>
-                        </td>
-                      </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="4">
-                                <h4 class="text-center">Aucune information</h4>
-                            </td>
-                        </tr>
-                    {% endfor %}
+                <tr>
+                    <td>Montant des livraisons soldées</td>
+                    <td>{{ montant_livraison_paid|format_price() }}</td>
+                </tr>
                 </tbody>
             </table>
-            </div>
+            <div class="panel-footer text-center"><span class="lead">{{ (montant_livraison - montant_livraison_paid)|format_price() }}</span></div>
         </div>
     </div>
-    <div class="col-lg-5">
-        <div class="panel panel-default">
+    <div class="col-lg-6">
+        <div class="panel panel-primary">
             <div class="panel-heading">
-                <h4>Statistique commandes</h4>
+                <h4>Total recouvrement</h4>
             </div>
             <table class="table">
                 <tbody>
                 <tr>
-                    <td>Commande en cours</td>
-                    <td>{{ stat_cmd_cours }}</td>
+                    <td>Montant des livraisons</td>
+                    <td>{{ mont_liv_global|format_price() }}</td>
                 </tr>
                 <tr>
-                    <td>Commande livrée</td>
-                    <td>{{ stat_cmd_livre }}</td>
-                </tr>
-                <tr>
-                    <td>Commande annulée</td>
-                    <td>{{ stat_cmd_annule }}</td>
-                </tr>
-                <tr>
-                    <td>Total commande</td>
-                    <td>{{ stat_cmd_total }}</td>
+                    <td>Montant des livraisons soldées</td>
+                    <td>{{ mont_liv_paid_global|format_price() }}</td>
                 </tr>
                 </tbody>
             </table>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>Statistique des ventes</h4>
-            </div>
-            <table class="table">
-                <tbody>
-                <tr>
-                    <td>Nouvelles ventes</td>
-                    <td>{{ vente_cours|format_price() }} F</td>
-                </tr>
-                <tr>
-                    <td>Anciennes ventes</td>
-                    <td>{{ vente_ancienne|format_price() }} F</td>
-                </tr>
-                <tr>
-                    <td>Total ventes</td>
-                    <td>{{ vente_total|format_price() }} F</td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="panel-footer text-center"><span class="lead">{{ (mont_liv_global - mont_liv_paid_global)|format_price() }}</span></div>
         </div>
     </div>
 </div>

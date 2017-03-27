@@ -2,6 +2,8 @@ __author__ = 'wilrona'
 
 import re
 import datetime
+from datetime import date, timedelta
+
 from application import app
 
 def datetime_convert(time): # Convertis time sous la forme YYYY-MM-DD HH:MM:SS
@@ -154,6 +156,17 @@ def convert_timedelta(duration):
     minutes = (seconds % 3600) // 60
     seconds = (seconds % 60)
     return hours, minutes, seconds
+
+
+def get_first_day(dt, d_years=0, d_months=0):
+    # d_years, d_months are "deltas" to apply to dt
+    y, m = dt.year + d_years, dt.month + d_months
+    a, m = divmod(m-1, 12)
+    return date(y+a, m+1, 1)
+
+
+def get_last_day(dt):
+    return get_first_day(dt, 0, 1) + timedelta(-1)
 
 
 app.jinja_env.filters['format_date'] = format_date

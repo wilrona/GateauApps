@@ -197,7 +197,7 @@ def index_refresh():
         Commande.dateCmd >= date_start,
         Commande.dateCmd <= date_end,
         Commande.annule == False
-    )
+    ).order(-Commande.dateCmd)
 
     count = datas
     number_per_page = 15
@@ -209,7 +209,7 @@ def index_refresh():
 
     if printer:
 
-        datas = datas.order(-Commande.dateCmd)
+        datas = datas
 
         import cStringIO
         output = cStringIO.StringIO()
@@ -231,6 +231,7 @@ def index_refresh():
             boucle = True
 
         if not boucle:
+            pages = 0
             modulo = count.count() % number_per_page
             div = count.count() / number_per_page
             if modulo:
@@ -294,13 +295,12 @@ def index_refresh():
             Time = Paragraph('''<b>Heure Liv.</b>''', styleBH)
 
             #recuperation des donnees
-            datas = [items for items in datas]
+            datas_report = [items for items in datas]
 
-            if page >= 2:
-                offset_start = (page - 1) * number_per_page
-                offset_end = page * number_per_page
+            offset_start = page * number_per_page
+            offset_end = (page + 1) * number_per_page
 
-                datas = datas[offset_start:offset_end]
+            datas_report = datas_report[offset_start:offset_end]
 
             data = [
                     [ref, client,theme, Dcmd, Dliv, Time]
@@ -308,7 +308,7 @@ def index_refresh():
                   ]
 
             breaking = 0
-            for i in datas:
+            for i in datas_report:
                 ref = Paragraph(i.ref, styleN)
                 client = Paragraph(i.user.get().name, styleN)
                 theme = Paragraph(i.theme, styleN)
@@ -321,7 +321,6 @@ def index_refresh():
                 if breaking > number_per_page:
                     break
 
-
             table = Table(data, colWidths=[3*cm, 7*cm, 5*cm, 2.5*cm, 2.5*cm, 2.5*cm])
 
             table.setStyle(TableStyle([
@@ -329,7 +328,6 @@ def index_refresh():
                                    ('INNERGRID', (0,0), (-1,-1), 0.25, '#000000'),
                                    ('BOX', (0,0), (-1,-1), 0.25, '#000000')
                                 ]))
-
 
             table.wrapOn(p, width, height)
             wt, ht = table.wrap(width, height)
@@ -471,13 +469,13 @@ def index_refresh_livraison():
             Time = Paragraph('''<b>Heure Liv.</b>''', styleBH)
 
             #recuperation des donnees
-            datas = [items for items in datas]
+            response = [items for items in datas]
 
-            if page >= 2:
-                offset_start = (page - 1) * number_per_page
-                offset_end = page * number_per_page
 
-                datas = datas[offset_start:offset_end]
+            offset_start = page * number_per_page
+            offset_end = (page + 1) * number_per_page
+
+            response = response[offset_start:offset_end]
 
             data= [
                     [ref, client,theme, Dcmd, Dliv, Time]
@@ -485,7 +483,7 @@ def index_refresh_livraison():
                   ]
 
             breaking = 0
-            for i in datas:
+            for i in response:
                 ref = Paragraph(i.ref, styleN)
                 client = Paragraph(i.user.get().name, styleN)
                 theme = Paragraph(i.theme, styleN)
@@ -1834,20 +1832,8 @@ def facture(id_commande):
     if commande.dateLiv >= datetime.date.today():
         update = True
 
-    total = 0
-
-    for produit in produit_commande:
-        montant = produit.prix
-        total = total + montant
-
-    total_accompte = total
-    accompte = 0
-    versement_cmd = Versement.query(
-        Versement.commande_id == commande.key
-    ).order(-Versement.dateVers)
-    for versement in versement_cmd:
-        total_accompte = total - versement.montant
-        accompte += versement.montant
+    total = commande.montant
+    versement = commande.montant_versment()
 
     return render_template('commande/facture.html', **locals())
 
