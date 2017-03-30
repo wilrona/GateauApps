@@ -1595,8 +1595,17 @@ def commande_terminer():
 
     commande = Commande()
     commande.user = client_id
-    commande.dateCmd = function.date_convert(date_auto_nows)
-    commande.dateLiv = function.date_convert(event_commande['date_liv'])
+
+    dateLiv = function.date_convert(event_commande['date_liv'])
+    dateCmd = function.date_convert(date_auto_nows)
+    current_year = function.date_convert(date_auto_nows).year
+
+    if dateLiv < date_auto_nows:
+        dateCmd = dateLiv - datetime.timedelta(days=10)
+        current_year = dateCmd.year
+
+    commande.dateCmd = dateCmd
+    commande.dateLiv = dateLiv
     commande.timeLiv = function.time_convert(event_commande['heure_liv'])
     commande.infos = event_commande['autre']
     commande.theme = event_commande['theme']
@@ -1604,7 +1613,7 @@ def commande_terminer():
 
     number_commande = Commande.query().count()
     number_commande += 1
-    current_year = function.date_convert(date_auto_nows).year
+
     format_ref = "CC/" + str(current_year) + '/' + str(number_commande)
 
     commande.ref = format_ref

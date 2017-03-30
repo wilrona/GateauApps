@@ -1033,8 +1033,27 @@ def send_facture():
 
                 pdf_file.key.delete()
 
+    return 'True'
 
 
+@prefix_planning.route('/send_rappel_anniversaire')
+def send_rappel_anniversaire():
+    from google.appengine.api import mail
+    import re
+
+    time_zones = pytz.timezone('Africa/Douala')
+    date_auto_nows = datetime.datetime.now(time_zones)
+
+    prev_year = int(date_auto_nows.year) - 1
+    prev_date_auto_nows = date_auto_nows.replace(year=prev_year)
+
+    date_send_15 = prev_date_auto_nows + datetime.timedelta(days=15)
+
+    date_send_7 = prev_date_auto_nows + datetime.timedelta(days=7)
+
+    all_commande = Commande.query(
+        Commande.dateLiv == date_send_15
+    )
 
     return 'True'
 

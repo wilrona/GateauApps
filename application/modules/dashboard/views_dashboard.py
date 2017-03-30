@@ -166,6 +166,18 @@ def rapport_recouvrement():
     return render_template('dashboard/rapport_recouvrement.html', **locals())
 
 
+@prefix.route('/rapport/statistique')
+@login_required
+@roles_required([('super_admin', 'dashboard')])
+def rapport_statistique():
+
+    title_page = 'Statistique des commandes'
+    menu = 'dashboard'
+    submenu = 'rapport_statistique'
+
+    return render_template('dashboard/rapport_statistique.html', **locals())
+
+
 @prefix.route('/rapport/recouvrements/refresh', methods=['GET', 'POST'])
 @login_required
 def rapport_recouvrement_refresh():

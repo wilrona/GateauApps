@@ -44,7 +44,7 @@ def date_anniv_existe(form, field):
 
 class FormCommande(wtf.Form):
     event = wtf.StringField(label='Selectionnez un evenement', validators=[validators.Required('Information Obligatoire')])
-    date_livre = wtf.StringField(label='Date de livraison', validators=[validators.Required('Date obligatoire'), current_date])
+    date_livre = wtf.StringField(label='Date de livraison', validators=[validators.Required('Date obligatoire')])
     heure_livre = wtf.StringField(label='Heure de livraison', validators=[validators.Required('Date obligatoire'), current_time])
     date_anniv = wtf.StringField(label='Date d\'anniversaire', default=datetime.date.today().strftime("%d/%m/%Y"), validators=[date_anniv_existe])
     age = wtf.StringField(label='Age ', validators=[validators.Required('Information Obligatoire')])
