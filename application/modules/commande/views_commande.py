@@ -1600,7 +1600,7 @@ def commande_terminer():
     dateCmd = function.date_convert(date_auto_nows)
     current_year = function.date_convert(date_auto_nows).year
 
-    if dateLiv < date_auto_nows:
+    if dateLiv < function.date_convert(date_auto_nows):
         dateCmd = dateLiv - datetime.timedelta(days=10)
         current_year = dateCmd.year
 
@@ -1631,7 +1631,6 @@ def commande_terminer():
     event_cmd = Event.get_by_id(int(event_commande['event_id']))
     commande.event_id = event_cmd.key
 
-
     day = datetime.date.today().strftime('%d/%m/%Y')
     dt = datetime.datetime.strptime(day, '%d/%m/%Y')
     start = dt
@@ -1644,7 +1643,6 @@ def commande_terminer():
         commande.mail_solde = 1
 
     commande = commande.put()
-
 
     user_curent = Users.get_by_id(int(request.args.get('user')))
     activite = Activite()
