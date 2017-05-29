@@ -548,3 +548,36 @@ def index():
     menu = 'parametre'
 
     return render_template('dashboard/parametre.html', **locals())
+
+
+@prefix.route('/rapport/etat_fixe')
+def rapport():
+
+    from ..commande.models_commande import ProduitCommander
+
+    start = function.date_convert('01/12/2016')
+    end = function.date_convert('24/05/2017')
+
+    produits = ProduitCommander.query()
+
+    prod = []
+    for produit in produits:
+        if start <= function.date_convert(produit.commande_id.get().dateLiv) <= end and produit.produit_id.get().type_produit == 1:
+            info = {}
+            info['categorie'] = produit.categorie_id.get().name
+            info['prix'] = produit.prix
+            info['unique'] = '1'
+            prod.append(info)
+
+    grouper = itemgetter("categorie", "unique")
+
+    datas = []
+    for key, grp in groupby(sorted(prod, key=grouper), grouper):
+        temp_dict = dict(zip(["categorie", "unique"], key))
+        temp_dict['CA'] = 0
+        temp_dict['Qte'] = 0
+        for item in grp:
+            temp_dict['CA'] += item['prix']
+            temp_dict['Qte'] += 1
+
+    return render_template('dashboard/rapport.html', **locals())

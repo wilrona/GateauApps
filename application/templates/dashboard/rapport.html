@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %} Rapport | {{ super() }}  {% endblock %}
+
+{% block layout_content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+                <h2>Rapport du CA et quantite des gateaux par categorie</h2>
+            </div>
+            <nav class="navbar navbar-toolbar" role="navigation">
+                <div class="container-fluid">
+                    <div class="btn-toolbar" role="toolbar">
+                        <div class="btn-group">
+                            <h3 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" class="date_start custom_input" value="{{ start|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" class="date_end custom_input" value="{{ end|format_date('%d/%m/%Y') }}"/>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            <div id="table" style="    position: relative; min-height: 345px;">
+                <div id="load" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3); display: none;    color: #fff;
+                font-size: 20px;
+                font-weight: bold;
+                text-align: center;
+                line-height: 20;">Chargement</div>
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th width="15%">Categorie</th>
+                        <th width="15%">Quantite</th>
+                        <th width="15%">Chiffre d'affaire</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for data in datas %}
+                        <tr>
+                            <td>{{ data.categorie }}</td>
+                            <td>{{ data.Qte }}</td>
+                            <td>{{ data.CA|format_price() }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">
+                                <h4 class="text-center">Aucune information</h4>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

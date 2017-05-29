@@ -120,5 +120,4 @@ def index():
             UserRole.role_id == admin_role.key
         ).count()
 
-
-    return render_template('/user/login.html', **locals())
+    return render_template('user/login.html', **locals())

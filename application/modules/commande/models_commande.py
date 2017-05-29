@@ -83,8 +83,6 @@ class Commande(ndb.Model):
         return montant
 
 
-
-
 class Versement(ndb.Model):
     commande_id = ndb.KeyProperty(kind=Commande)
     dateVers = ndb.DateProperty()
