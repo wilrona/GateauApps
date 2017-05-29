@@ -5,10 +5,7 @@
 {% block layout_content %}
     <div class="row">
         <div class="col-lg-12">
-            <div class="page-header">
-                <h2>Rapport du CA et quantite des gateaux par categorie</h2>
-            </div>
-            <nav class="navbar navbar-toolbar" role="navigation">
+            <nav class="navbar navbar-toolbar" role="navigation" style="margin-top: 20px;">
                 <div class="container-fluid">
                     <div class="btn-toolbar" role="toolbar">
                         <div class="btn-group">
@@ -18,18 +15,12 @@
                     </div>
                 </div>
             </nav>
+
+            <div class="page-header">
+                <h2>Rapport du CA et quantite des gateaux par categorie</h2>
+            </div>
+
             <div id="table" style="    position: relative; min-height: 345px;">
-                <div id="load" style="
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0,0,0,0.3); display: none;    color: #fff;
-                font-size: 20px;
-                font-weight: bold;
-                text-align: center;
-                line-height: 20;">Chargement</div>
                 <table class="table table-condensed">
                     <thead>
                     <tr>
@@ -39,11 +30,76 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for data in datas %}
+                    {% for data1 in datas_product %}
                         <tr>
-                            <td>{{ data.categorie }}</td>
-                            <td>{{ data.Qte }}</td>
-                            <td>{{ data.CA|format_price() }}</td>
+                            <td>{{ data1.categorie }}</td>
+                            <td>{{ data1.Qte }}</td>
+                            <td>{{ data1.CA|format_price() }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">
+                                <h4 class="text-center">Aucune information</h4>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+            <hr>
+            <div class="page-header">
+                <h2>Rapport du CA et quantite des cupcake par type</h2>
+            </div>
+
+            <div id="table" style="    position: relative; min-height: 345px;">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th width="15%">Type </th>
+                        <th width="15%">Quantite</th>
+                        <th width="15%">Chiffre d'affaire</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for data2 in datas_cupcake %}
+                        <tr>
+                            <td>{{ data2.categorie }}</td>
+                            <td>{{ data2.Qte }}</td>
+                            <td>{{ data2.CA|format_price() }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3">
+                                <h4 class="text-center">Aucune information</h4>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+
+            <hr>
+            <div class="page-header">
+                <h2>Rapport du CA et quantite des sables par type</h2>
+            </div>
+
+            <div id="table" style="    position: relative; min-height: 345px;">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th width="15%">Type </th>
+                        <th width="15%">Quantite</th>
+                        <th width="15%">Chiffre d'affaire</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for data3 in datas_sable %}
+                        <tr>
+                            <td>{{ data3.categorie }}</td>
+                            <td>{{ data3.Qte }}</td>
+                            <td>{{ data3.CA|format_price() }}</td>
                         </tr>
                     {% else %}
                         <tr>

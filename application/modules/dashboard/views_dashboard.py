@@ -560,24 +560,67 @@ def rapport():
 
     produits = ProduitCommander.query()
 
-    prod = []
+    prod_gateau = []
+    prod_cupcake = []
+    prod_sable = []
+
     for produit in produits:
-        if start <= function.date_convert(produit.commande_id.get().dateLiv) <= end and produit.produit_id.get().type_produit == 1:
-            info = {}
-            info['categorie'] = produit.categorie_id.get().name
-            info['prix'] = produit.prix
-            info['unique'] = '1'
-            prod.append(info)
+        if start <= function.date_convert(produit.commande_id.get().dateLiv) <= end:
+
+            if produit.produit_id.get().type_produit == 1:
+                info = {}
+                info['categorie'] = produit.categorie_id.get().name
+                info['prix'] = produit.prix
+                info['unique'] = '1'
+                prod_gateau.append(info)
+
+            if produit.produit_id.get().type_produit == 3:
+                info = {}
+                info['categorie'] = produit.typeGateau_id.get().name
+                info['prix'] = produit.prix
+                info['unique'] = '1'
+                prod_cupcake.append(info)
+
+            if produit.produit_id.get().type_produit == 2:
+                info = {}
+                info['categorie'] = produit.typeGateau_id.get().name
+                info['prix'] = produit.prix
+                info['unique'] = '1'
+                prod_sable.append(info)
 
     grouper = itemgetter("categorie", "unique")
 
-    datas = []
-    for key, grp in groupby(sorted(prod, key=grouper), grouper):
+    datas_product = []
+    for key, grp in groupby(sorted(prod_gateau, key=grouper), grouper):
         temp_dict = dict(zip(["categorie", "unique"], key))
         temp_dict['CA'] = 0
         temp_dict['Qte'] = 0
         for item in grp:
             temp_dict['CA'] += item['prix']
             temp_dict['Qte'] += 1
+
+        datas_product.append(temp_dict)
+
+    datas_cupcake = []
+    for key, grp in groupby(sorted(prod_cupcake, key=grouper), grouper):
+        temp_dict = dict(zip(["categorie", "unique"], key))
+        temp_dict['CA'] = 0
+        temp_dict['Qte'] = 0
+        for item in grp:
+            temp_dict['CA'] += item['prix']
+            temp_dict['Qte'] += 1
+
+        datas_cupcake.append(temp_dict)
+
+    datas_sable = []
+    for key, grp in groupby(sorted(prod_sable, key=grouper), grouper):
+        temp_dict = dict(zip(["categorie", "unique"], key))
+        temp_dict['CA'] = 0
+        temp_dict['Qte'] = 0
+        for item in grp:
+            temp_dict['CA'] += item['prix']
+            temp_dict['Qte'] += 1
+
+        datas_sable.append(temp_dict)
 
     return render_template('dashboard/rapport.html', **locals())
