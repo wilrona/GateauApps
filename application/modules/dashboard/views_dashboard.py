@@ -1,7 +1,7 @@
 __author__ = 'Ronald'
 
 from ...modules import *
-from ..commande.models_commande import Commande, Users
+from ..commande.models_commande import Commande, Users, ProduitCommander
 
 # Flask-Cache (configured to use App Engine Memcache API)
 cache = Cache(app)
@@ -553,40 +553,41 @@ def index():
 @prefix.route('/rapport/etat_fixe')
 def rapport():
 
-    from ..commande.models_commande import ProduitCommander
-
     start = function.date_convert('01/12/2016')
     end = function.date_convert('24/05/2017')
 
-    produits = ProduitCommander.query()
+    commandes = Commande.query()
 
     prod_gateau = []
     prod_cupcake = []
     prod_sable = []
 
-    for produit in produits:
-        if start <= function.date_convert(produit.commande_id.get().dateLiv) <= end:
+    for commande in commandes:
+        if start <= commande.dateLiv <= end and not commande.annule:
+            for produit in commande.produit_commande(verified=True):
+                if produit.produit_id.get().type_produit == 1:
+                    info = {}
+                    info['categorie'] = produit.categorie_id.get().name
+                    info['prix'] = produit.prix
+                    info['unique'] = '1'
+                    info['qte'] = 1
+                    prod_gateau.append(info)
 
-            if produit.produit_id.get().type_produit == 1:
-                info = {}
-                info['categorie'] = produit.categorie_id.get().name
-                info['prix'] = produit.prix
-                info['unique'] = '1'
-                prod_gateau.append(info)
+                if produit.produit_id.get().type_produit == 3:
+                    info = {}
+                    info['categorie'] = produit.typeGateau_id.get().name
+                    info['prix'] = produit.prix
+                    info['unique'] = '1'
+                    info['qte'] = produit.qte
+                    prod_cupcake.append(info)
 
-            if produit.produit_id.get().type_produit == 3:
-                info = {}
-                info['categorie'] = produit.typeGateau_id.get().name
-                info['prix'] = produit.prix
-                info['unique'] = '1'
-                prod_cupcake.append(info)
-
-            if produit.produit_id.get().type_produit == 2:
-                info = {}
-                info['categorie'] = produit.typeGateau_id.get().name
-                info['prix'] = produit.prix
-                info['unique'] = '1'
-                prod_sable.append(info)
+                if produit.produit_id.get().type_produit == 2:
+                    info = {}
+                    info['categorie'] = produit.typeGateau_id.get().name
+                    info['prix'] = produit.prix
+                    info['unique'] = '1'
+                    info['qte'] = produit.qte
+                    prod_sable.append(info)
 
     grouper = itemgetter("categorie", "unique")
 
@@ -597,7 +598,7 @@ def rapport():
         temp_dict['Qte'] = 0
         for item in grp:
             temp_dict['CA'] += item['prix']
-            temp_dict['Qte'] += 1
+            temp_dict['Qte'] += item['qte']
 
         datas_product.append(temp_dict)
 
@@ -608,7 +609,7 @@ def rapport():
         temp_dict['Qte'] = 0
         for item in grp:
             temp_dict['CA'] += item['prix']
-            temp_dict['Qte'] += 1
+            temp_dict['Qte'] += item['qte']
 
         datas_cupcake.append(temp_dict)
 
@@ -619,7 +620,7 @@ def rapport():
         temp_dict['Qte'] = 0
         for item in grp:
             temp_dict['CA'] += item['prix']
-            temp_dict['Qte'] += 1
+            temp_dict['Qte'] += item['qte']
 
         datas_sable.append(temp_dict)
 
