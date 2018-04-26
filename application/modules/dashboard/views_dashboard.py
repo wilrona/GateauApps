@@ -642,11 +642,10 @@ def rapport_produit():
 
     data_content = []
     for commande in list_commande:
-
         for produit in commande.produit_commande():
-            # if produit.type_produit == 1:
+            if produit.produit_id.get().type_produit == 1:
                 info = {}
-                info['date'] = Monthly[commande.dateCmd.month - 1]
+                info['date'] = Monthly[commande.dateCmd.month - 1] + '/' + str(commande.dateCmd.year)
                 info['categorie'] = produit.categorie_id.get().name
                 data_content.append(info)
     grouper = itemgetter("date", "categorie")
