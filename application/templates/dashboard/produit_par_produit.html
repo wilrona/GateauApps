@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %} Rapport | {{ super() }}  {% endblock %}
+
+{% block layout_content %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="page-header">
+                <h1>Statistique des produits par mois</h1>
+                {% include 'includes/flash_message.html' %}
+            </div>
+            <nav class="navbar navbar-toolbar" role="navigation">
+                <div class="container-fluid">
+                    <form method="get">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group">
+                                <h3 class="text-center" style="margin-top: 0;">Periode <input type="text" id="datepicker_input" name="start" class="date_start custom_input" value="{{ start|format_date('%d/%m/%Y') }}"/>  au  <input type="text" id="datepicker2_input" name="end" class="date_end custom_input" value="{{ end|format_date('%d/%m/%Y') }}"/>
+                                </h3>
+                            </div>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-primary">Valider</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </nav>
+            {{ data_content }}
+
+            <div id="table" style="    position: relative; min-height: 345px;">
+                <table class="table table-condensed">
+                    <thead>
+                    <tr>
+                        <th width="15%">Date</th>
+                        <th width="15%">Categorie</th>
+                        <th width="15%">Nombre</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for data in datas %}
+                        <tr>
+                            <td>{{ data.date }}</td>
+                            <td>{{ data.categorie }}</td>
+                            <td>{{ data.count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block footer_script %}
+    <script>
+        $('#datepicker_input').datepicker({
+            format: "dd/mm/yyyy",
+            weekStart: 1,
+            todayBtn: "linked",
+            autoclose: true,
+            orientation: "top auto",
+            todayHighlight: true,
+            language: "fr"
+        }).on('changeDate', function(e) {
+
+            // Proceed with your code
+            var date_start = $('#datepicker_input').val();
+            var date_end = $('#datepicker2_input').val();
+
+            var datas = {};
+
+            var date_start_js = date_start;
+            date_start_js = date_start_js.split('/');
+            reforme_date = (date_start_js[1]) + '/' + date_start_js[0] + '/' + date_start_js[2];
+            date_start_js = new Date(reforme_date);
+
+            var date_end_js = date_end;
+            date_end_js = date_end_js.split('/');
+            reforme_date = (date_end_js[1]) + '/' + date_end_js[0] + '/' + date_end_js[2];
+            date_end_js = new Date(reforme_date);
+
+            if(date_start_js <= date_end_js){
+                datas['date_start'] = date_start;
+                datas['date_end'] = date_end;
+            }else{
+                date_end = date_start;
+                $('#datepicker2_input').val(date_start);
+                datas['date_start'] = date_start;
+                datas['date_end'] = date_end;
+            }
+        }).inputmask("date", { placeholder:"__/__/____"});
+
+        $('#datepicker2_input').datepicker({
+            format: "dd/mm/yyyy",
+            weekStart: 1,
+            todayBtn: "linked",
+            autoclose: true,
+            orientation: "top auto",
+            todayHighlight: true,
+            language: "fr"
+        }).on('changeDate', function(e) {
+
+            // Proceed with your code
+            var date_start = $('#datepicker_input').val();
+            var date_end = $('#datepicker2_input').val();
+
+            var datas = {};
+
+            var date_start_js = date_start;
+            date_start_js = date_start_js.split('/');
+            reforme_date = (date_start_js[1]) + '/' + date_start_js[0] + '/' + date_start_js[2];
+            date_start_js = new Date(reforme_date);
+
+            var date_end_js = date_end;
+            date_end_js = date_end_js.split('/');
+            reforme_date = (date_end_js[1]) + '/' + date_end_js[0] + '/' + date_end_js[2];
+            date_end_js = new Date(reforme_date);
+
+            if(date_start_js >= date_end_js){
+                date_start = date_end;
+                $('#datepicker_input').val(date_end);
+                datas['date_start'] = date_start;
+                datas['date_end'] = date_end;
+            }else{
+                datas['date_start'] = date_start;
+                datas['date_end'] = date_end;
+            }
+        }).inputmask("date", { placeholder:"__/__/____"});
+
+
+    </script>
+{% endblock %}

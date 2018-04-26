@@ -7,5 +7,6 @@
                 <li {% if submenu == 'rapport_vente' %} class="active" {% endif %}><a href="{{ url_for('dashboard.rapport_vente') }}">Rapport des ventes</a></li>
                 <li {% if submenu == 'rapport_recouvrement' %} class="active" {% endif %}><a href="{{ url_for('dashboard.rapport_recouvrement') }}">Rapport des recouvrements</a></li>
                 <li {% if submenu == 'rapport_statistique' %} class="active" {% endif %}><a href="{{ url_for('dashboard.rapport_statistique') }}">Statistique des commandes</a></li>
+                <li {% if submenu == 'rapport_produit' %} class="active" {% endif %}><a href="{{ url_for('dashboard.rapport_produit') }}">Statistique par type de produit</a></li>
         </ul>
 </div>

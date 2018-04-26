@@ -89,6 +89,11 @@ indexes:
 
 - kind: Commande
   properties:
+  - name: livre
+  - name: dateCmd
+
+- kind: Commande
+  properties:
   - name: mail_type
   - name: dateLiv
   - name: timeLiv

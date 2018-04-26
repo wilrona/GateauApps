@@ -100,7 +100,7 @@ def rapport_vente():
         list_commande = []
         for commande in datas:
 
-            data_commande = commande.ref+" "+commande.user.get().name
+            data_commande = commande.ref + " " + commande.user.get().name
             search_function = function.find(data_commande.lower(), q)
             if search_function:
                 list_commande.append(commande)
@@ -118,7 +118,6 @@ def rapport_vente():
 @login_required
 @roles_required([('super_admin', 'dashboard')])
 def rapport_recouvrement():
-
     title_page = 'Rapport des recouvrements'
     menu = 'dashboard'
     submenu = 'rapport_recouvrement'
@@ -150,7 +149,7 @@ def rapport_recouvrement():
         list_commande = []
         for commande in datas:
 
-            data_commande = commande.ref+" "+commande.user.get().name
+            data_commande = commande.ref + " " + commande.user.get().name
             search_function = function.find(data_commande.lower(), q)
             if search_function:
                 list_commande.append(commande)
@@ -170,7 +169,6 @@ def rapport_recouvrement():
 @login_required
 @roles_required([('super_admin', 'dashboard')])
 def rapport_statistique():
-
     title_page = 'Statistique des commandes'
     menu = 'dashboard'
     submenu = 'rapport_statistique'
@@ -181,7 +179,6 @@ def rapport_statistique():
 @prefix.route('/rapport/recouvrements/refresh', methods=['GET', 'POST'])
 @login_required
 def rapport_recouvrement_refresh():
-
     title_page = 'Rapport des recouvrements'
     printer = request.args.get('print')
 
@@ -203,17 +200,16 @@ def rapport_recouvrement_refresh():
     count = datas.count()
 
     if search:
-        title_page += ' (Mot cherche: '+search+')'
+        title_page += ' (Mot cherche: ' + search + ')'
 
         list_commande = []
         for commande in datas:
-            data_commande = commande.ref+" "+commande.user.get().name
+            data_commande = commande.ref + " " + commande.user.get().name
             search_function = function.find(data_commande.lower(), search)
             if search_function:
                 list_commande.append(commande)
         datas = list_commande
         count = len(datas)
-
 
     total_montant = 0
     total_versment = 0
@@ -233,10 +229,10 @@ def rapport_recouvrement_refresh():
         style = getSampleStyleSheet()
         width, height = landscape(letter)
 
-        topMargin = 20.5*cm
-        leftMargin = cm*12.5
-        leftMargin2 = cm*22.5
-        bottomMargin = cm/2
+        topMargin = 20.5 * cm
+        leftMargin = cm * 12.5
+        leftMargin2 = cm * 22.5
+        bottomMargin = cm / 2
 
         p = canvas.Canvas(output, pagesize=landscape(letter))
         p.setTitle(title_page)
@@ -264,14 +260,16 @@ def rapport_recouvrement_refresh():
 
             c = Paragraph(header, style=style['Normal'])
             wti, hti = c.wrapOn(p, width, height)
-            c.drawOn(p, width - wti + 10.5*cm, 19.5*cm)
+            c.drawOn(p, width - wti + 10.5 * cm, 19.5 * cm)
 
             string = '<font name="Times-Roman" size="12">%s</font>'
-            date_string = string % 'Periode du '+function.format_date(date_start, '%d/%m/%Y')+' au '+function.format_date(date_end, '%d/%m/%Y')
+            date_string = string % 'Periode du ' + function.format_date(date_start,
+                                                                        '%d/%m/%Y') + ' au ' + function.format_date(
+                date_end, '%d/%m/%Y')
 
             c = Paragraph(date_string, style=style['Normal'])
             c.wrapOn(p, width, height)
-            c.drawOn(p, 11*cm, 18.5*cm)
+            c.drawOn(p, 11 * cm, 18.5 * cm)
 
             # Save the state of our canvas so we can draw on it
             p.saveState()
@@ -285,7 +283,7 @@ def rapport_recouvrement_refresh():
 
             # Footer
             string = '<font name="Times-Roman" size="8">%s</font>'
-            footer = string % ''+str(function.format_date(now, '%d/%m/%Y %H:%M'))
+            footer = string % '' + str(function.format_date(now, '%d/%m/%Y %H:%M'))
             footer = Paragraph(footer, style['Normal'])
             wi, he = footer.wrap(width, bottomMargin)
             footer.drawOn(p, leftMargin, he)
@@ -309,7 +307,7 @@ def rapport_recouvrement_refresh():
             accompte = Paragraph('''<b>Accompte</b>''', styleBH)
             reste = Paragraph('''<b>Reste</b>''', styleBH)
 
-            #recuperation des donnees
+            # recuperation des donnees
             datas_report = [items for items in datas]
 
             offset_start = page * number_per_page
@@ -327,24 +325,23 @@ def rapport_recouvrement_refresh():
                 montant = Paragraph(str(function.format_price(i.montant)), styleN)
                 accompte = Paragraph(str(function.format_price(i.montant_versment())), styleN)
                 reste = Paragraph(str(function.format_price((i.montant - i.montant_versment()))), styleN)
-                current = [ref, client,montant, accompte, reste]
+                current = [ref, client, montant, accompte, reste]
                 data.append(current)
                 breaking += 1
                 if breaking > number_per_page:
                     break
 
-            table = Table(data, colWidths=[5*cm, 6*cm, 5*cm, 3.5*cm, 3*cm])
+            table = Table(data, colWidths=[5 * cm, 6 * cm, 5 * cm, 3.5 * cm, 3 * cm])
 
             table.setStyle(TableStyle([
-                ('BACKGROUND',(0,0),(-1,0),'#eeeeee'),
-                ('INNERGRID', (0,0), (-1,-1), 0.25, '#000000'),
-                ('BOX', (0,0), (-1,-1), 0.25, '#000000')
+                ('BACKGROUND', (0, 0), (-1, 0), '#eeeeee'),
+                ('INNERGRID', (0, 0), (-1, -1), 0.25, '#000000'),
+                ('BOX', (0, 0), (-1, -1), 0.25, '#000000')
             ]))
-
 
             table.wrapOn(p, width, height)
             wt, ht = table.wrap(width, height)
-            table.drawOn(p, 2.5*cm, height - ht - 3.5*cm)
+            table.drawOn(p, 2.5 * cm, height - ht - 3.5 * cm)
 
             p.showPage()
 
@@ -365,7 +362,6 @@ def rapport_recouvrement_refresh():
 @prefix.route('/rapport/ventes/refresh', methods=['GET', 'POST'])
 @login_required
 def rapport_vente_refresh():
-
     title_page = 'Rapport des ventes'
     printer = request.args.get('print')
 
@@ -378,8 +374,6 @@ def rapport_vente_refresh():
         date_end = function.date_convert(request.args.get('date_end'))
         search = request.args.get('search')
 
-
-
     datas = Commande.query(
         Commande.dateCmd >= date_start,
         Commande.dateCmd <= date_end,
@@ -389,11 +383,11 @@ def rapport_vente_refresh():
     count = datas.count()
 
     if search:
-        title_page += ' (Mot cherche: '+search+')'
+        title_page += ' (Mot cherche: ' + search + ')'
 
         list_commande = []
         for commande in datas:
-            data_commande = commande.ref+" "+commande.user.get().name
+            data_commande = commande.ref + " " + commande.user.get().name
             search_function = function.find(data_commande.lower(), search)
             if search_function:
                 list_commande.append(commande)
@@ -416,10 +410,10 @@ def rapport_vente_refresh():
         style = getSampleStyleSheet()
         width, height = landscape(letter)
 
-        topMargin = 20.5*cm
-        leftMargin = cm*12.5
-        leftMargin2 = cm*22.5
-        bottomMargin = cm/2
+        topMargin = 20.5 * cm
+        leftMargin = cm * 12.5
+        leftMargin2 = cm * 22.5
+        bottomMargin = cm / 2
 
         p = canvas.Canvas(output, pagesize=landscape(letter))
         p.setTitle(title_page)
@@ -447,14 +441,16 @@ def rapport_vente_refresh():
 
             c = Paragraph(header, style=style['Normal'])
             wti, hti = c.wrapOn(p, width, height)
-            c.drawOn(p, width - wti + 10.5*cm, 19.5*cm)
+            c.drawOn(p, width - wti + 10.5 * cm, 19.5 * cm)
 
             string = '<font name="Times-Roman" size="12">%s</font>'
-            date_string = string % 'Periode du '+function.format_date(date_start, '%d/%m/%Y')+' au '+function.format_date(date_end, '%d/%m/%Y')
+            date_string = string % 'Periode du ' + function.format_date(date_start,
+                                                                        '%d/%m/%Y') + ' au ' + function.format_date(
+                date_end, '%d/%m/%Y')
 
             c = Paragraph(date_string, style=style['Normal'])
             c.wrapOn(p, width, height)
-            c.drawOn(p, 11*cm, 18.5*cm)
+            c.drawOn(p, 11 * cm, 18.5 * cm)
 
             # Save the state of our canvas so we can draw on it
             p.saveState()
@@ -468,7 +464,7 @@ def rapport_vente_refresh():
 
             # Footer
             string = '<font name="Times-Roman" size="8">%s</font>'
-            footer = string % ''+str(function.format_date(now, '%d/%m/%Y %H:%M'))
+            footer = string % '' + str(function.format_date(now, '%d/%m/%Y %H:%M'))
             footer = Paragraph(footer, style['Normal'])
             wi, he = footer.wrap(width, bottomMargin)
             footer.drawOn(p, leftMargin, he)
@@ -490,7 +486,7 @@ def rapport_vente_refresh():
             client = Paragraph('''<b>Client</b>''', styleBH)
             montant = Paragraph('''<b>Montant</b>''', styleBH)
 
-            #recuperation des donnees
+            # recuperation des donnees
             datas_report = [items for items in datas]
 
             offset_start = page * number_per_page
@@ -506,24 +502,23 @@ def rapport_vente_refresh():
                 ref = Paragraph(i.ref, styleN)
                 client = Paragraph(i.user.get().name, styleN)
                 montant = Paragraph(str(function.format_price(i.montant)), styleN)
-                current = [ref, client,montant]
+                current = [ref, client, montant]
                 data.append(current)
                 breaking += 1
                 if breaking > number_per_page:
                     break
 
-            table = Table(data, colWidths=[5.5*cm, 9.5*cm, 7.5*cm])
+            table = Table(data, colWidths=[5.5 * cm, 9.5 * cm, 7.5 * cm])
 
             table.setStyle(TableStyle([
-                ('BACKGROUND',(0,0),(-1,0),'#eeeeee'),
-                ('INNERGRID', (0,0), (-1,-1), 0.25, '#000000'),
-                ('BOX', (0,0), (-1,-1), 0.25, '#000000')
+                ('BACKGROUND', (0, 0), (-1, 0), '#eeeeee'),
+                ('INNERGRID', (0, 0), (-1, -1), 0.25, '#000000'),
+                ('BOX', (0, 0), (-1, -1), 0.25, '#000000')
             ]))
-
 
             table.wrapOn(p, width, height)
             wt, ht = table.wrap(width, height)
-            table.drawOn(p, 2.5*cm, height - ht - 3.5*cm)
+            table.drawOn(p, 2.5 * cm, height - ht - 3.5 * cm)
 
             p.showPage()
 
@@ -552,7 +547,6 @@ def index():
 
 @prefix.route('/rapport/etat_fixe')
 def rapport():
-
     start = function.date_convert('01/12/2016')
     end = function.date_convert('24/05/2017')
 
@@ -625,3 +619,45 @@ def rapport():
         datas_sable.append(temp_dict)
 
     return render_template('dashboard/rapport.html', **locals())
+
+
+@prefix.route('/rapport/produit_par_produit')
+def rapport_produit():
+    Monthly = ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec']
+
+    time_zones = pytz.timezone('Africa/Douala')
+    date_auto_nows = datetime.datetime.now(time_zones)
+
+    if request.args.get('start') and request.args.get('end'):
+        start = function.get_first_day(function.date_convert(request.args.get('start')))
+        end = function.get_last_day(function.date_convert(request.args.get('end')))
+    else:
+        start = function.get_first_day(date_auto_nows)
+        end = function.get_last_day(date_auto_nows)
+
+    list_commande = Commande.query(
+        Commande.dateCmd >= start,
+        Commande.dateCmd <= end
+    )
+
+    data_content = []
+    for commande in list_commande:
+
+        for produit in commande.produit_commande():
+            # if produit.type_produit == 1:
+                info = {}
+                info['date'] = Monthly[commande.dateCmd.month - 1]
+                info['categorie'] = produit.categorie_id.get().name
+                data_content.append(info)
+    grouper = itemgetter("date", "categorie")
+
+    datas = []
+    for key, grp in groupby(sorted(data_content, key=grouper), grouper):
+        temp_dict = dict(zip(["date", "categorie"], key))
+        temp_dict['count'] = 0
+        for item in grp:
+            temp_dict['count'] += 1
+
+        datas.append(temp_dict)
+
+    return render_template('dashboard/produit_par_produit.html', **locals())
