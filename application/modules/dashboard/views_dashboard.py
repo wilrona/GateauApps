@@ -630,7 +630,7 @@ def rapport_produit():
 
     if request.args.get('start') and request.args.get('end'):
         start = function.get_first_day(function.date_convert(request.args.get('start')))
-        end = function.get_last_day(function.date_convert(request.args.get('end')))
+        end = function.get_last_day(function.date_convert(request.args.get('start')))
     else:
         start = function.get_first_day(date_auto_nows)
         end = function.get_last_day(date_auto_nows)
@@ -647,6 +647,7 @@ def rapport_produit():
                 info = {}
                 info['date'] = Monthly[commande.dateCmd.month - 1] + '/' + str(commande.dateCmd.year)
                 info['categorie'] = produit.categorie_id.get().name
+                info['prix'] = produit.prix
                 data_content.append(info)
     grouper = itemgetter("date", "categorie")
 
@@ -654,8 +655,10 @@ def rapport_produit():
     for key, grp in groupby(sorted(data_content, key=grouper), grouper):
         temp_dict = dict(zip(["date", "categorie"], key))
         temp_dict['count'] = 0
+        temp_dict['montant'] = 0
         for item in grp:
             temp_dict['count'] += 1
+            temp_dict['montant'] += item['prix']
 
         datas.append(temp_dict)
 
