@@ -877,7 +877,7 @@ def send_facture_test(id_facture):
                     PdfTable.commande_id == commande.key
                 ).get()
 
-                message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob),('Condition-vente.pdf', document)]
+                message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob),('Conditions-ventes.pdf', document)]
 
                 send = message.send()
 
@@ -994,7 +994,7 @@ def send_facture():
                     PdfTable.commande_id == commande.key
                 ).get()
 
-                message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob),('Condition-vente.pdf', document)]
+                message.attachments = [('Facture-commande-'+commande.ref+'.pdf', pdf_file.archivoBlob),('Conditions-ventes.pdf', document)]
 
                 send = message.send()
 
@@ -1054,6 +1054,14 @@ def send_rappel_anniversaire():
     all_commande = Commande.query(
         Commande.dateLiv == date_send_15
     )
+
+    # message = mail.EmailMessage()
+    # template = render_template('commande/planning/email_facture.html', **locals())
+    # message.html = template
+    # message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
+    # message.subject = 'Des modifications d\'information sur votre commande du '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
+    # message.to = client
+    # send = message.send()
 
     return 'True'
 
