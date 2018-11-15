@@ -449,16 +449,19 @@ def calendar_init():
 
                     description = 'Theme : '+current_commande.theme+'\n'
                     description += 'Evenement : '+current_commande.event_id.get().name+'\n'
-                    description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
-                    description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
-                    description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
-                    description += 'Montant : '+str(current_commande.montant)+'\n'
+                    description += 'Nombre de part/quantite : '+str(part)+'\n'
+
 
                     if produit.produit_id.get().type_produit == 1:
                         description += 'Categorie : '+produit.categorie_id.get().name+'\n'
                         description += 'Moule : '
                         for moule in produit.list_moule():
                             description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+
+                    description += '\n\n\n'
+                    description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+                    description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
+                    description += 'Montant : '+str(current_commande.montant)+'\n'
 
                     event = {
                       'summary': summary,
@@ -523,16 +526,18 @@ def calendar_update(id_commande):
 
                 description = 'Theme : '+current_commande.theme+'\n'
                 description += 'Evenement : '+current_commande.event_id.get().name+'\n'
-                description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
-                description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
-                description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
-                description += 'Montant : '+str(current_commande.montant)+'\n'
+                description += 'Nombre de part/quantite : '+str(part)+'\n'
 
                 if produit.produit_id.get().type_produit == 1:
                     description += 'Categorie : '+produit.categorie_id.get().name+'\n'
                     description += 'Moule : '
                     for moule in produit.list_moule():
                         description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+
+                description += '\n\n\n'
+                description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+                description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
+                description += 'Montant : '+str(current_commande.montant)+'\n'
 
                 event = service.events().get(calendarId=calendar.agendaID, eventId=produit.eventID).execute()
                 event['summary'] = summary
@@ -583,16 +588,18 @@ def calendar(id_commande):
 
             description = 'Theme : '+current_commande.theme+'\n'
             description += 'Evenement : '+current_commande.event_id.get().name+'\n'
-            description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
-            description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
-            description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
-            description += 'Montant : '+str(current_commande.montant)+'\n'
+            description += 'Nombre de part/quantite : '+str(part)+'\n'
 
             if produit.produit_id.get().type_produit == 1:
                 description += 'Categorie : '+produit.categorie_id.get().name+'\n'
                 description += 'Moule : '
                 for moule in produit.list_moule():
                     description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+
+            description += '\n\n\n'
+            description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+            description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
+            description += 'Montant : '+str(current_commande.montant)+'\n'
 
             event = {
                 'summary': summary,
@@ -700,17 +707,18 @@ def calendar_event():
 
                         description = 'Theme : '+produ.commande_id.get().theme+'\n'
                         description += 'Evenement : '+produ.commande_id.get().event_id.get().name+'\n'
-                        description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
-                        description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().id))+'\n'
-                        description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
-                        description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
-
+                        description += 'Nombre de part/quantite : '+str(part)+'\n'
 
                         if produ.produit_id.get().type_produit == 1:
                             description += 'Categorie : '+produ.categorie_id.get().name+'\n'
                             description += 'Moule : '
                             for moule in produ.list_moule():
                                 description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+
+                        description += '\n\n\n'
+                        description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().id))+'\n'
+                        description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
+                        description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
 
                         event = service.events().get(calendarId=calendar.agendaID, eventId=produ.eventID).execute()
                         event['summary'] = summary
@@ -737,16 +745,19 @@ def calendar_event():
 
                 description = 'Theme : '+produ.commande_id.get().theme+'\n'
                 description += 'Evenement : '+produ.commande_id.get().event_id.get().name+'\n'
-                description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
-                description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().id))+'\n'
-                description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
-                description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
+                description += 'Nombre de part/quantite : '+str(part)+'\n'
+
 
                 if produ.produit_id.get().type_produit == 1:
                     description += 'Categorie : '+produ.categorie_id.get().name+'\n'
                     description += 'Moule : '
                     for moule in produ.list_moule():
                         description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+
+                description += '\n\n\n'
+                description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().id))+'\n'
+                description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
+                description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
 
                 event = {
                     'summary': summary,
