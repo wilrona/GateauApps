@@ -19,8 +19,14 @@ def index():
 
     current_day = datetime.date.today()
 
+    time_zones = pytz.timezone('Africa/Douala')
+    date_auto_nows = datetime.datetime.now(time_zones)
+
+    start = function.get_first_day(date_auto_nows)
+
     commandes = Commande.query(
-        Commande.annule == False
+        Commande.annule == False,
+        Commande.dateCmd >= start
     )
 
     montant_commande = 0
