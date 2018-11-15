@@ -449,7 +449,10 @@ def calendar_init():
 
                     description = 'Theme : '+current_commande.theme+'\n'
                     description += 'Evenement : '+current_commande.event_id.get().name+'\n'
-                    description += 'Nombre de part/quantite : '+str(part)+'\n'
+                    description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
+                    description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+                    description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
+                    description += 'Montant : '+str(current_commande.montant)+'\n'
 
                     if produit.produit_id.get().type_produit == 1:
                         description += 'Categorie : '+produit.categorie_id.get().name+'\n'
@@ -478,7 +481,6 @@ def calendar_init():
                     produit.put()
 
     return 'True'
-
 
 
 @prefix_planning.route('/update_calendar/<int:id_commande>')
@@ -521,7 +523,10 @@ def calendar_update(id_commande):
 
                 description = 'Theme : '+current_commande.theme+'\n'
                 description += 'Evenement : '+current_commande.event_id.get().name+'\n'
-                description += 'Nombre de part/quantite : '+str(part)+'\n'
+                description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
+                description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+                description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
+                description += 'Montant : '+str(current_commande.montant)+'\n'
 
                 if produit.produit_id.get().type_produit == 1:
                     description += 'Categorie : '+produit.categorie_id.get().name+'\n'
@@ -538,6 +543,7 @@ def calendar_update(id_commande):
                 updated_event = service.events().update(calendarId=calendar.agendaID, eventId=event['id'], body=event).execute()
 
     return 'True'
+
 
 @prefix_planning.route('/add_calendar/<int:id_commande>')
 def calendar(id_commande):
@@ -577,7 +583,10 @@ def calendar(id_commande):
 
             description = 'Theme : '+current_commande.theme+'\n'
             description += 'Evenement : '+current_commande.event_id.get().name+'\n'
-            description += 'Nombre de part/quantite : '+str(part)+'\n'
+            description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
+            description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+            description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
+            description += 'Montant : '+str(current_commande.montant)+'\n'
 
             if produit.produit_id.get().type_produit == 1:
                 description += 'Categorie : '+produit.categorie_id.get().name+'\n'
@@ -605,7 +614,6 @@ def calendar(id_commande):
             produit.put()
 
     return 'True'
-
 
 
 @prefix_planning.route('/add_event/auto')
@@ -692,7 +700,11 @@ def calendar_event():
 
                         description = 'Theme : '+produ.commande_id.get().theme+'\n'
                         description += 'Evenement : '+produ.commande_id.get().event_id.get().name+'\n'
-                        description += 'Nombre de part/quantite : '+str(part)+'\n'
+                        description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
+                        description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().id))+'\n'
+                        description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
+                        description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
+
 
                         if produ.produit_id.get().type_produit == 1:
                             description += 'Categorie : '+produ.categorie_id.get().name+'\n'
@@ -725,7 +737,10 @@ def calendar_event():
 
                 description = 'Theme : '+produ.commande_id.get().theme+'\n'
                 description += 'Evenement : '+produ.commande_id.get().event_id.get().name+'\n'
-                description += 'Nombre de part/quantite : '+str(part)+'\n'
+                description += 'Nombre de part/quantite : '+str(part)+'\n\n\n\n'
+                description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().id))+'\n'
+                description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
+                description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
 
                 if produ.produit_id.get().type_produit == 1:
                     description += 'Categorie : '+produ.categorie_id.get().name+'\n'
@@ -754,7 +769,6 @@ def calendar_event():
 
 
     return 'TRUE'
-
 
 
 @prefix_planning.route('/delete_event/<int:id_produit>')
@@ -825,6 +839,7 @@ def calendar_event_delete(id_produit):
         #     events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
 
     return 'True'
+
 
 @prefix_planning.route('/send_facture/<int:id_facture>')
 def send_facture_test(id_facture):
@@ -948,6 +963,7 @@ def send_facture_test(id_facture):
 
     return 'TRUE'
 
+
 @prefix_planning.route('/send_facture_cron')
 def send_facture_cron():
     import requests
@@ -1014,7 +1030,6 @@ def send_facture():
 
                 template = render_template('commande/planning/email_facture.html', **locals())
                 message.html = template
-
 
                 message.sender = 'Creative Cake <no_reply@creative-cake.appspotmail.com>'
                 message.subject = 'Solde de votre commande '+ function.format_date(function.date_convert(commande.dateCmd), '%d/%m/%Y')
