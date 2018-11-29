@@ -459,7 +459,10 @@ def calendar_init():
                             description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
 
                     description += '\n\n\n'
-                    description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+                    description += 'Montant du produit : '+str(produit.prix)+'\n'
+
+                    description += '\n\n\n'
+                    description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.key.id()))+'\n'
                     description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
                     description += 'Montant : '+str(current_commande.montant)+'\n'
 
@@ -535,7 +538,10 @@ def calendar_update(id_commande):
                         description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
 
                 description += '\n\n\n'
-                description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+                description += 'Montant du produit : '+str(produit.prix)+'\n'
+
+                description += '\n\n\n'
+                description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.key.id()))+'\n'
                 description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
                 description += 'Montant : '+str(current_commande.montant)+'\n'
 
@@ -597,7 +603,10 @@ def calendar(id_commande):
                     description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
 
             description += '\n\n\n'
-            description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.id))+'\n'
+            description += 'Montant du produit : '+str(produit.prix)+'\n'
+
+            description += '\n\n\n'
+            description += 'Commande : '+str(url_for('commande.facture', id_commande=current_commande.key.id()))+'\n'
             description += 'Accompte : '+str(current_commande.montant_versment())+'\n'
             description += 'Montant : '+str(current_commande.montant)+'\n'
 
@@ -651,9 +660,13 @@ def calendar_event():
             page_token = events.get('nextPageToken')
             if not page_token:
                 break
+        time_zones = pytz.timezone('Africa/Douala')
+        date_auto_nows = datetime.datetime.now(time_zones)
+
+        start = function.get_first_day(date_auto_nows)
 
         cmd_calendar = Commande.query(
-            Commande.dateLiv >= datetime.date.today(),
+            Commande.dateLiv >= start,
             Commande.annule == False
         )
 
@@ -716,7 +729,10 @@ def calendar_event():
                                 description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
 
                         description += '\n\n\n'
-                        description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().id))+'\n'
+                        description += 'Montant du produit : '+str(produ.prix)+'\n'
+
+                        description += '\n\n\n'
+                        description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().key.id()))+'\n'
                         description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
                         description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
 
@@ -747,7 +763,6 @@ def calendar_event():
                 description += 'Evenement : '+produ.commande_id.get().event_id.get().name+'\n'
                 description += 'Nombre de part/quantite : '+str(part)+'\n'
 
-
                 if produ.produit_id.get().type_produit == 1:
                     description += 'Categorie : '+produ.categorie_id.get().name+'\n'
                     description += 'Moule : '
@@ -755,7 +770,10 @@ def calendar_event():
                         description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
 
                 description += '\n\n\n'
-                description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().id))+'\n'
+                description += 'Montant du produit : '+str(produ.prix)+'\n'
+
+                description += '\n\n\n'
+                description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().key.id()))+'\n'
                 description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
                 description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
 
