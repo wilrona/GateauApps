@@ -702,8 +702,13 @@ def calendar_event():
 
             if produ.eventID:
 
+                exist = False
+
                 for list_ev in list_event:
+
                     if list_ev['id'] == produ.eventID and list_ev['start'] != list_prod['start']:
+
+                        exist = True
 
                         prod = 'Cupcake'
                         part = produ.qte
@@ -743,6 +748,58 @@ def calendar_event():
                         event['end']['dateTime'] = end
 
                         updated_event = service.events().update(calendarId=calendar.agendaID, eventId=event['id'], body=event).execute()
+
+                if not exist:
+
+                    prod = 'Cupcake'
+                    part = produ.qte
+                    if produ.produit_id.get().type_produit == 1:
+                        prod = 'Gateau'
+                        list_part = global_part
+                        part = list_part[produ.nbrPart]
+
+                    if produ.produit_id.get().type_produit == 2:
+                        prod = 'Sable'
+                        part = produ.qte
+
+                    summary = prod+' de '+produ.commande_id.get().user.get().name+' de la commande '+produ.commande_id.get().ref
+
+                    description = 'Theme : '+produ.commande_id.get().theme+'\n'
+                    description += 'Evenement : '+produ.commande_id.get().event_id.get().name+'\n'
+                    description += 'Nombre de part/quantite : '+str(part)+'\n'
+
+                    if produ.produit_id.get().type_produit == 1:
+                        description += 'Categorie : '+produ.categorie_id.get().name+'\n'
+                        description += 'Moule : '
+                        for moule in produ.list_moule():
+                            description += moule.moule_id.get().name+' ('+str(moule.qte)+'),'
+
+                    description += '\n\n\n'
+                    description += 'Montant du produit : '+str(produ.prix)+'\n'
+
+                    description += '\n\n\n'
+                    description += 'Commande : '+str(url_for('commande.facture', id_commande=produ.commande_id.get().key.id()))+'\n'
+                    description += 'Accompte : '+str(produ.commande_id.get().montant_versment())+'\n'
+                    description += 'Montant : '+str(produ.commande_id.get().montant)+'\n'
+
+                    event = {
+                        'summary': summary,
+                        'description': description,
+                        'start': {
+                            'dateTime': start,
+                            'timeZone': 'Africa/Lagos',
+                        },
+                        'end': {
+                            'dateTime': end,
+                            'timeZone': 'Africa/Lagos',
+                        },
+                        'reminders': {
+                            'useDefault': True
+                        }
+                    }
+                    events = service.events().insert(calendarId=calendar.agendaID, body=event).execute()
+                    produ.eventID = events['id']
+                    produ.put()
 
             else:
 
